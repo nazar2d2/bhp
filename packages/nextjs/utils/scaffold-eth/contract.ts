@@ -8,7 +8,6 @@ import {
 } from "abitype";
 import type { ExtractAbiFunctionNames } from "abitype";
 import { Address, Log, TransactionReceipt } from "viem";
-// import { Prettify } from "viem/dist/types/types/utils";
 import { Prettify } from "viem/types/utils";
 import { UseContractEventConfig, UseContractReadConfig, UseContractWriteConfig } from "wagmi";
 import contractsData from "~~/generated/deployedContracts";
