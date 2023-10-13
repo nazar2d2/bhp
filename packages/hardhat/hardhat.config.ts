@@ -45,75 +45,75 @@ const config: HardhatUserConfig = {
     },
     mainnet: {
       url: `https://eth-mainnet.alchemyapi.io/v2/${providerApiKey}`,
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
     },
     sepolia: {
       url: `https://eth-sepolia.g.alchemy.com/v2/${providerApiKey}`,
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
     },
     goerli: {
       url: `https://eth-goerli.alchemyapi.io/v2/${providerApiKey}`,
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
     },
     arbitrum: {
       url: `https://arb-mainnet.g.alchemy.com/v2/${providerApiKey}`,
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
     },
     arbitrumGoerli: {
       url: `https://arb-goerli.g.alchemy.com/v2/${providerApiKey}`,
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
     },
     optimism: {
       url: `https://opt-mainnet.g.alchemy.com/v2/${providerApiKey}`,
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
     },
     optimismGoerli: {
       url: `https://opt-goerli.g.alchemy.com/v2/${providerApiKey}`,
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
     },
     polygon: {
       url: `https://polygon-mainnet.g.alchemy.com/v2/${providerApiKey}`,
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
     },
     polygonMumbai: {
       url: `https://polygon-mumbai.g.alchemy.com/v2/${providerApiKey}`,
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
     },
     polygonZkEvm: {
       url: `https://polygonzkevm-mainnet.g.alchemy.com/v2/${providerApiKey}`,
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
     },
     polygonZkEvmTestnet: {
       url: `https://polygonzkevm-testnet.g.alchemy.com/v2/${providerApiKey}`,
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
     },
     zkSyncTestnet: {
       url: "https://testnet.era.zksync.dev",
       zksync: true,
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
       verifyURL: "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
     },
     zkSync: {
       url: "https://mainnet.era.zksync.io",
       zksync: true,
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
       verifyURL: "https://zksync2-mainnet-explorer.zksync.io/contract_verification",
     },
     gnosis: {
       url: "https://rpc.gnosischain.com",
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
     },
     chiado: {
       url: "https://rpc.chiadochain.net",
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
     },
     base: {
       url: "https://mainnet.base.org",
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
     },
     baseGoerli: {
       url: "https://goerli.base.org",
-      accounts: [ deployerPrivateKey ],
+      accounts: [deployerPrivateKey],
     },
   },
   verify: {

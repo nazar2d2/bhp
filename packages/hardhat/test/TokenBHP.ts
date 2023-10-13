@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { TokenBHP, TokenPresale, Staking } from "../typechain-types";
+import { TokenBHP, TokenPresale } from "../typechain-types";
 import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
 import { formatEther, parseUnits, formatUnits } from "ethers/lib/utils";
 import { expect } from "chai";
@@ -19,11 +19,17 @@ describe("TokenBHP", function () {
     [owner, acc1, multiSignAddress] = await ethers.getSigners();
 
     const TokenPresale = await ethers.getContractFactory("TokenPresale");
-    const tokenPresale = await TokenPresale.deploy(owner.address, acc1.address) as TokenPresale;
+    const tokenPresale = (await TokenPresale.deploy(owner.address, acc1.address)) as TokenPresale;
     await tokenPresale.deployed();
 
     const TokenBHP = await ethers.getContractFactory("TokenBHP");
-    const tokenBHP = await TokenBHP.deploy(owner.address, name, symbol, multiSignAddress.address, tokenPresale.address) as TokenBHP;
+    const tokenBHP = (await TokenBHP.deploy(
+      owner.address,
+      name,
+      symbol,
+      multiSignAddress.address,
+      tokenPresale.address,
+    )) as TokenBHP;
     await tokenBHP.deployed();
 
     return [tokenBHP, tokenPresale];

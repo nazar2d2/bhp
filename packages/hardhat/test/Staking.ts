@@ -15,11 +15,11 @@ describe("Staking", function () {
     const [owner] = await ethers.getSigners();
 
     const TokenBHP = await ethers.getContractFactory("TokenBHP");
-    const tokenBHP = await TokenBHP.deploy(owner.address, "Token", "TKN", TEST_ADDRESS, TEST_ADDRESS) as TokenBHP;
+    const tokenBHP = (await TokenBHP.deploy(owner.address, "Token", "TKN", TEST_ADDRESS, TEST_ADDRESS)) as TokenBHP;
     await tokenBHP.deployed();
 
     const Staking = await ethers.getContractFactory("Staking");
-    const staking = await Staking.deploy(owner.address, tokenBHP.address) as Staking;
+    const staking = (await Staking.deploy(owner.address, tokenBHP.address)) as Staking;
     await staking.deployed();
 
     await tokenBHP.setStakingContractAddress(staking.address);
@@ -372,7 +372,6 @@ describe("Staking", function () {
     let staking: Staking;
     let signer: SignerWithAddress;
     let rewardPerSecond: BigNumber;
-    let reward: BigNumber;
     const amount = ethers.utils.parseEther("21000000");
 
     beforeEach(async function () {
@@ -385,7 +384,6 @@ describe("Staking", function () {
 
       const seconds = 60 * 60 * 24;
       await time.increase(seconds - 1);
-      reward = rewardPerSecond.mul(seconds).mul(90).div(100);
     });
 
     it("Should change token balances", async function () {
