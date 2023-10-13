@@ -1802,7 +1802,7 @@ const contracts = {
       name: "sepolia",
       contracts: {
         Locker: {
-          address: "0x88A28b5c40477d44bf2F5C022BFbD2583A0e8011",
+          address: "0xBe4C3635AfF60642193f9BD6C7e0F2e70e179D2F",
           abi: [
             {
               inputs: [],
@@ -1975,7 +1975,7 @@ const contracts = {
           ],
         },
         Staking: {
-          address: "0x7C9f629091482A7e16B56f7Fd91e3e53cD2B907c",
+          address: "0x26d3762575B78DF729C2c2fb82DA45883c2E37C3",
           abi: [
             {
               inputs: [
@@ -2386,7 +2386,7 @@ const contracts = {
           ],
         },
         TokenBHP: {
-          address: "0x03414dDB12a313Bb9CBe150A878990e32Bd3b5B6",
+          address: "0xc651B2B3C089Dd853103cCeBDCf51E091e5EB8E2",
           abi: [
             {
               inputs: [
@@ -2878,6 +2878,25 @@ const contracts = {
               type: "function",
             },
             {
+              inputs: [
+                {
+                  internalType: "uint32",
+                  name: "_amount",
+                  type: "uint32",
+                },
+              ],
+              name: "getPreSalePriceEth",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
               inputs: [],
               name: "marketingMint",
               outputs: [],
@@ -2934,6 +2953,19 @@ const contracts = {
               name: "preSaleMint",
               outputs: [],
               stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint32",
+                  name: "_amount",
+                  type: "uint32",
+                },
+              ],
+              name: "preSaleMintEth",
+              outputs: [],
+              stateMutability: "payable",
               type: "function",
             },
             {
