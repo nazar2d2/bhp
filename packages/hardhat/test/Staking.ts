@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { TokenBHP, Staking } from "../typechain-types";
-import { formatEther } from "ethers/lib/utils";
+import { formatEther, parseEther } from "ethers/lib/utils";
 
 const TEST_ADDRESS = "0x0000000000000000000000000000000000000001";
 
@@ -205,31 +205,59 @@ describe("Staking", function () {
       expect(acc1Rewards).to.eq(rewardPerSecond.mul(seconds));
     });
 
-    it("Correct rewards in 90 days - 1 user (1.5x)", async function () {
+    it("Correct rewards in 90 days - 1 user (no multiplier)", async function () {
       await staking.connect(acc1).deposit(amount);
       const seconds = 60 * 60 * 24 * 90;
       await time.increase(seconds);
 
       const [, acc1Rewards] = await staking.getDepositInfo(acc1.address);
-      expect(acc1Rewards).to.eq(rewardPerSecond.mul(seconds).mul(150).div(100));
+      expect(acc1Rewards).to.eq(rewardPerSecond.mul(seconds));
     });
 
-    it("Correct rewards in 180 days - 1 user (2x)", async function () {
+    it("Correct rewards in 180 days - 2 users, 150% diff", async function () {
       await staking.connect(acc1).deposit(amount);
       const seconds = 60 * 60 * 24 * 180;
       await time.increase(seconds);
 
-      const [, acc1Rewards] = await staking.getDepositInfo(acc1.address);
-      expect(acc1Rewards).to.eq(rewardPerSecond.mul(seconds).mul(2));
-    });
-
-    it("Correct rewards in 360 days - 1 user (2.5x)", async function () {
-      await staking.connect(acc1).deposit(amount);
-      const seconds = 60 * 60 * 24 * 360;
+      await staking.connect(acc2).deposit(amount);
+      const [, acc1RewardsStartAfter] = await staking.getDepositInfo(acc1.address);
       await time.increase(seconds);
 
-      const [, acc1Rewards] = await staking.getDepositInfo(acc1.address);
-      expect(acc1Rewards).to.eq(rewardPerSecond.mul(seconds).mul(250).div(100));
+      const [, acc1RewardsEnd] = await staking.getDepositInfo(acc1.address);
+      const [, acc2RewardsEnd] = await staking.getDepositInfo(acc2.address);
+
+      // Acc 1 earned more in second epoch, because staking period is longer
+      expect(acc1RewardsEnd.sub(acc1RewardsStartAfter)).gt(acc1RewardsStartAfter);
+      expect(acc1RewardsStartAfter).gt(acc2RewardsEnd);
+    });
+
+    it("Correct rewards in 180 days - 2 users, with 2x multiplier", async function () {
+      await staking.connect(acc1).deposit(amount.div(2));
+      await staking.connect(acc2).deposit(amount.div(2));
+
+      const seconds30d = 60 * 60 * 24 * 30;
+      await time.increase(seconds30d);
+
+      // Get current rewards and withdraw
+      const [, acc1RewardsStart] = await staking.getDepositInfo(acc1.address);
+      const [, acc2RewardsStart] = await staking.getDepositInfo(acc2.address);
+      expect(acc1RewardsStart).to.eq(acc2RewardsStart);
+
+      await staking.connect(acc2).withdraw(amount.div(2));
+
+      // Get rewards after withdraw
+      const [, acc1RewardsAfterWithdraw] = await staking.getDepositInfo(acc1.address);
+      const [, acc2RewardsAfterWithdraw] = await staking.getDepositInfo(acc2.address);
+      expect(acc2RewardsAfterWithdraw).gt(acc2RewardsStart);
+      expect(acc1RewardsAfterWithdraw).to.equal(acc2RewardsAfterWithdraw.mul(2));
+
+      await time.increase(seconds30d);
+
+      // Check rewards after 30 days
+      // const [, acc1RewardsEnd] = await staking.getDepositInfo(acc1.address);
+      const [, acc2RewardsEnd] = await staking.getDepositInfo(acc2.address);
+
+      expect(acc2RewardsEnd).to.eq(acc2RewardsAfterWithdraw);
     });
 
     it("Correct rewards in 1 second - 2 users (50/50)", async function () {
@@ -282,11 +310,6 @@ describe("Staking", function () {
       const [, acc1StartRewards] = await staking.getDepositInfo(acc1.address);
 
       await staking.connect(acc2).deposit(amount.div(10));
-      const [, acc1CheckRewards] = await staking.getDepositInfo(acc1.address);
-      const [, acc2CheckRewards] = await staking.getDepositInfo(acc2.address);
-      expect(acc1CheckRewards).to.eq(rewardPerSecond.mul(10).mul(90).div(100));
-      expect(acc2CheckRewards).to.eq(0);
-
       await time.increase(1);
 
       // acc1 start staking by deposit 100% and activate rewards
@@ -297,7 +320,18 @@ describe("Staking", function () {
 
       const acc1Final = parseFloat(formatEther(acc1FinalRewards.sub(acc1StartRewards))).toFixed(16);
       const acc2Final = parseFloat(formatEther(acc2FinalRewards.mul(10))).toFixed(16);
+
       expect(acc1Final).to.eq(acc2Final);
+    });
+
+    it("Correct rewards in 2.5 years, when staking stopped", async function () {
+      await staking.connect(acc1).deposit(amount);
+      await time.increase(3600 * 24 * 900);
+      await time.increase(1);
+
+      const [, rewards] = await staking.getDepositInfo(acc1.address);
+
+      expect(rewards).lte(totalStakingSupply);
     });
   });
 

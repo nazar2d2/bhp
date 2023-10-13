@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         Locker: {
-          address: "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+          address: "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
           abi: [
             {
               inputs: [],
@@ -145,6 +145,30 @@ const contracts = {
                   name: "_tokenAddress",
                   type: "address",
                 },
+                {
+                  internalType: "address",
+                  name: "_owner",
+                  type: "address",
+                },
+              ],
+              name: "getUnlockTime",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "_tokenAddress",
+                  type: "address",
+                },
               ],
               name: "withdrawTokens",
               outputs: [],
@@ -154,7 +178,7 @@ const contracts = {
           ],
         },
         Staking: {
-          address: "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+          address: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
           abi: [
             {
               inputs: [
@@ -296,10 +320,22 @@ const contracts = {
               type: "function",
             },
             {
-              inputs: [],
-              name: "endStaking",
-              outputs: [],
-              stateMutability: "nonpayable",
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "_user",
+                  type: "address",
+                },
+              ],
+              name: "getApy",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
               type: "function",
             },
             {
@@ -445,6 +481,19 @@ const contracts = {
               type: "function",
             },
             {
+              inputs: [],
+              name: "totalUsersWeight",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
               inputs: [
                 {
                   internalType: "address",
@@ -501,6 +550,25 @@ const contracts = {
             {
               inputs: [
                 {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              name: "userWeight",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
                   internalType: "uint256",
                   name: "_amount",
                   type: "uint256",
@@ -521,7 +589,7 @@ const contracts = {
           ],
         },
         TokenBHP: {
-          address: "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+          address: "0x0165878A594ca255338adfa4d48449f69242Eb8F",
           abi: [
             {
               inputs: [
@@ -1242,7 +1310,7 @@ const contracts = {
           ],
         },
         TokenPresale: {
-          address: "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
+          address: "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
           abi: [
             {
               inputs: [

@@ -16,12 +16,10 @@ contract Staking is ReentrancyGuard, Ownable {
     uint256 public stakingStartTime = 0;
     uint256 public stakingEndTime = 0;
     uint256 public totalStaked = 0;
-
-//	function getApy(){
-//
-//	}
+    uint256 public totalUsersWeight = 0;
 
     mapping(address => Stake) public userStakes;
+    mapping(address => uint256) public userWeight;
 
     struct Stake {
         uint256 deposited;
@@ -67,23 +65,18 @@ contract Staking is ReentrancyGuard, Ownable {
         isPaused = false;
     }
 
-    function endStaking()
-    external
-    onlyOwner
-    {
-        stakingEndTime = block.timestamp;
-    }
-
     // Deposit tokens to the contract, start/update staking
     function deposit(uint256 _amount)
     external
     nonReentrant
+    whenNotPaused
     {
         require(_amount > 0, "E03: Invalid amount");
         require(token.transferFrom(msg.sender, address(this), _amount), "E04: Transfer failed");
 
         if (stakingStartTime == 0 && totalStaked + _amount >= stakingAmountToStart) {
             stakingStartTime = block.timestamp;
+            stakingEndTime = block.timestamp + 900 days;
         }
 
         Stake storage userStake = userStakes[msg.sender];
@@ -102,6 +95,8 @@ contract Staking is ReentrancyGuard, Ownable {
             userStake.timeOfLastUpdate = block.timestamp;
         }
 
+        _updateUserWeight(userStake);
+
         totalStaked += _amount;
         emit Deposit(msg.sender, _amount);
     }
@@ -112,7 +107,6 @@ contract Staking is ReentrancyGuard, Ownable {
     nonReentrant
     {
         Stake storage userStake = userStakes[msg.sender];
-
         uint256 rewards = calculateRewards(msg.sender) + userStake.unclaimedRewards;
         require(rewards > 0, "E05: You have no rewards");
 
@@ -122,8 +116,9 @@ contract Staking is ReentrancyGuard, Ownable {
 
         userStake.unclaimedRewards = 0;
         userStake.timeOfLastUpdate = block.timestamp;
+        _updateUserWeight(userStake);
 
-        _transfer_tokens(msg.sender, rewards);
+        _transferTokens(msg.sender, rewards);
         emit ClaimRewards(msg.sender, rewards);
     }
 
@@ -141,7 +136,11 @@ contract Staking is ReentrancyGuard, Ownable {
         userStake.unclaimedRewards = _rewards;
         totalStaked -= _amount;
 
-        _transfer_tokens(msg.sender, _amount);
+        // reset user multiplier
+        userStake.startStaking = block.timestamp;
+        _updateUserWeight(userStake);
+
+        _transferTokens(msg.sender, _amount);
         emit Withdraw(msg.sender, _amount);
     }
 
@@ -160,12 +159,16 @@ contract Staking is ReentrancyGuard, Ownable {
             revert("E09: Not enough tokens in the contract for rewards");
         }
 
+        // reset reset + reset user multiplier
         userStake.deposited = 0;
         userStake.timeOfLastUpdate = 0;
+        userStake.startStaking = block.timestamp;
+
         uint256 _amount = _rewards + _deposit;
         totalStaked -= _deposit;
 
-        _transfer_tokens(msg.sender, _amount);
+        _updateUserWeight(userStake);
+        _transferTokens(msg.sender, _amount);
         emit Withdraw(msg.sender, _amount);
     }
 
@@ -188,7 +191,7 @@ contract Staking is ReentrancyGuard, Ownable {
     view
     returns (uint256)
     {
-        if (stakingStartTime == 0 || totalStaked == 0 || block.timestamp < stakingStartTime) {
+        if (stakingStartTime == 0 || totalUsersWeight == 0 || block.timestamp < stakingStartTime) {
             return 0;
         }
 
@@ -201,18 +204,37 @@ contract Staking is ReentrancyGuard, Ownable {
             _startRewardsTimestamp = userStake.timeOfLastUpdate;
         }
 
-        uint256 _stakingDuration = block.timestamp - userStake.startStaking;
-        uint256 _multiplier = getDurationMultiplier(_stakingDuration);
-        uint256 _userWeight = (userStake.deposited * _multiplier) / 1 ether;
-
         uint256 _lastRewardsTimestamp;
-        if (stakingEndTime == 0) {
+        if (stakingEndTime > block.timestamp) {
             _lastRewardsTimestamp = block.timestamp;
         } else {
             _lastRewardsTimestamp = stakingEndTime;
         }
 
-        return _userWeight * (_lastRewardsTimestamp - _startRewardsTimestamp) * rewardsPerSecond / totalStaked;
+        uint256 _userWeight = _getUserWeight(userStake.deposited, userStake.startStaking);
+        uint256 _userWeightInPoolPct = _userWeight * 1 ether / _getTotalUsersWeightUpdated(_user);
+        uint256 _rewards = (_userWeightInPoolPct * rewardsPerSecond * (_lastRewardsTimestamp - _startRewardsTimestamp)) / 1 ether;
+
+        // 10% penalty for early withdrawal
+        uint256 _stakingDuration = block.timestamp - userStake.startStaking;
+        if (_stakingDuration < 30 days) {
+            _rewards = _rewards * 0.9 ether / 1 ether;
+        }
+
+        return _rewards;
+    }
+
+    function getApy(address _user) external view returns (uint256) {
+        if (stakingStartTime == 0 || block.timestamp >= stakingEndTime || totalUsersWeight == 0 || block.timestamp < stakingStartTime) {
+            return 0;
+        }
+
+        Stake storage userStake = userStakes[_user];
+        uint256 _userWeight = _getUserWeight(userStake.deposited, userStake.startStaking);
+        uint256 _userWeightInPool = _userWeight * 1 ether / _getTotalUsersWeightUpdated(_user);
+        uint256 _rewards30d = (_userWeightInPool * rewardsPerSecond * 30 days) / 1 ether;
+
+        return _rewards30d * 12 * 100;
     }
 
     // -------------------- Private ----------------------
@@ -220,9 +242,7 @@ contract Staking is ReentrancyGuard, Ownable {
     function getDurationMultiplier(uint256 _duration)
     private pure
     returns (uint256) {
-        if (_duration < 30 days) {
-            return 0.9 ether;  // -10% penalty
-        } else if (_duration < 90 days) {
+        if (_duration < 90 days) {
             return 1 ether; // 100% for 30 days
         } else if (_duration < 180 days) {
             return 1.5 ether; // 150% for 90 days
@@ -233,10 +253,41 @@ contract Staking is ReentrancyGuard, Ownable {
         }
     }
 
-    function _transfer_tokens(address _to, uint256 _amount)
+    function _transferTokens(address _to, uint256 _amount)
     private
     {
         require(token.transfer(_to, _amount), "E08: Transfer failed");
+    }
+
+    function _getUserWeight(uint256 _deposit, uint256 _startStaking)
+    private view
+    returns (uint256)
+    {
+        uint256 _stakingDuration = block.timestamp - _startStaking;
+        return ((_deposit * getDurationMultiplier(_stakingDuration)) / 1 ether) / 1 ether;
+    }
+
+    function _getTotalUsersWeightUpdated(address _user)
+    private view
+    returns (uint256)
+    {
+        Stake storage userStake = userStakes[_user];
+        uint256 _weightBefore = userWeight[_user];
+        uint256 _actualUserWeight = _getUserWeight(userStake.deposited, userStake.startStaking);
+        return totalUsersWeight + _actualUserWeight - _weightBefore;
+    }
+
+    function _updateUserWeight(Stake storage userStake)
+    private
+    {
+        uint256 _weightBefore = userWeight[msg.sender];
+        userWeight[msg.sender] = _getUserWeight(userStake.deposited, userStake.startStaking);
+
+        if (userWeight[msg.sender] > _weightBefore) {
+            totalUsersWeight += userWeight[msg.sender] - _weightBefore;
+        } else {
+            totalUsersWeight -= _weightBefore - userWeight[msg.sender];
+        }
     }
 
 }
