@@ -1,0 +1,6 @@
+{
+  "remappings": [
+    "hardhat/=/tmp/packages/hardhat/node_modules/hardhat/",
+    "@openzeppelin/contracts/=/tmp/packages/hardhat/node_modules/@openzeppelin/contracts/"
+  ]
+}
