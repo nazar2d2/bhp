@@ -77,5 +77,4 @@ $RECYCLE.BIN/
 
 .yarn/cache
 .yarn/patches
-.yarn/releases
 install-state.gz
