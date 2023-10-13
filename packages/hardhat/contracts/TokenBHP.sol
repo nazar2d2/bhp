@@ -88,6 +88,7 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
         }
     }
 
+    // @title Get ecosystem amount available for mint
     function getEcosystemUnlocked()
     public view
     returns (uint256)
@@ -111,6 +112,7 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
         }
     }
 
+    // @title Get marketing amount available for mint
     function getMarketingUnlocked()
     public view
     returns (uint256)
@@ -118,6 +120,7 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
         return getEcosystemMarketingUnlocked() - marketingVestingMinted;
     }
 
+    // @title Get ecosystem & marketing unlocked amount
     function getEcosystemMarketingUnlocked()
     public view
     returns (uint256)
@@ -137,6 +140,7 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
         return _unlockedAmount;
     }
 
+    // @title Buy BHP tokens for ERC20 token
     // amount - count of tokens to buy (not wei)
     function preSaleMint(uint32 _amount)
     external
@@ -157,6 +161,32 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
         _mint(msg.sender, _amountWei);
     }
 
+    // @title Buy BHP tokens for ETH
+    // amount - count of tokens to buy (not wei)
+    function preSaleMintEth(uint32 _amount)
+    external payable
+    {
+        uint256 _amountWei = uint256(_amount) * 10 ** 18;
+
+        if (_amount == 0) {
+            revert("E03: Amount can't be zero");
+        }
+        if (presaleMinted + _amountWei > oneDistributionPart) {
+            revert("E03: Presale limit reached");
+        }
+
+
+        uint256 _totalPriceETH = getPreSalePriceEth(_amount);
+
+        if (msg.value < _totalPriceETH) {
+            revert("E04: Not enough ETH");
+        }
+
+        presaleMinted += _amountWei;
+        _mint(msg.sender, _amountWei);
+    }
+
+    // @title Get pre-sale price for ERC20 token
     // amount - count of tokens to buy (not wei)
     function getPreSalePrice(uint32 _amount)
     public view
@@ -177,6 +207,15 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
             return 13 * _priceOne * _amount;
         }
         return 21 * _priceOne * _amount;
+    }
+
+    // @title Get pre-sale price for ETH
+    function getPreSalePriceEth(uint32 _amount)
+    public view
+    returns (uint256)
+    {
+        uint256 _totalPriceUSD = getPreSalePrice(_amount);
+        return (_totalPriceUSD * 10 ** 12) / 2000;
     }
 
     receive()
