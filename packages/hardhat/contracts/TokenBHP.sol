@@ -6,9 +6,8 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./helpers/modifiers.sol";
 
-contract TokenBHP is ERC20, ERC20Burnable, Ownable, Modifiers {
+contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     using SafeERC20 for IERC20;
 
     uint256 public constant MAX_SUPPLY = 1618 * 10 ** 6 * 10 ** 18;
@@ -75,8 +74,11 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable, Modifiers {
 
     function ecosystemMint()
     external
-    throwIfAddressIsInvalid(multiSignContractAddress)
     {
+        if (multiSignContractAddress == address(0)) {
+            revert("E01: MultiSign contract not set");
+        }
+
         uint256 _availableForMint = getEcosystemUnlocked();
         uint256 _minUnlockAmount = oneDistributionPart / 5;
 
@@ -95,8 +97,11 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable, Modifiers {
 
     function marketingMint()
     external
-    throwIfAddressIsInvalid(multiSignContractAddress)
     {
+        if (multiSignContractAddress == address(0)) {
+            revert("E01: MultiSign contract not set");
+        }
+
         uint256 _availableForMint = getMarketingUnlocked();
         uint256 _minUnlockAmount = oneDistributionPart / 5;
 
@@ -117,8 +122,9 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable, Modifiers {
     public view
     returns (uint256)
     {
-        require(uint64(block.timestamp) >= vestingStart, "E01: Vesting not started");
-        require(vestingEnd > vestingStart, "E02: Wrong vesting period");
+        if (block.timestamp < vestingStart || vestingEnd < vestingStart) {
+            return 0;
+        }
 
         uint256 _unlockedAmount;
         if (block.timestamp >= vestingEnd) {
@@ -134,10 +140,15 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable, Modifiers {
     // amount - count of tokens to buy (not wei)
     function preSaleMint(uint32 _amount)
     external
-    throwIfEqualToZero(_amount)
     {
         uint256 _amountWei = uint256(_amount) * 10 ** 18;
-        require(presaleMinted + _amountWei < oneDistributionPart, "E03: Presale limit reached");
+
+        if (_amount == 0) {
+            revert("E03: Amount can't be zero");
+        }
+        if (presaleMinted + _amountWei > oneDistributionPart) {
+            revert("E03: Presale limit reached");
+        }
 
         uint256 _totalPrice = getPreSalePrice(_amount);
         IERC20(preSalePaymentToken).safeTransferFrom(msg.sender, multiSignContractAddress, _totalPrice);
@@ -187,10 +198,14 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable, Modifiers {
 
     function setStakingContractAddress(address _stakingAddress)
     external
-    throwIfAddressIsInvalid(_stakingAddress)
     onlyOwner
     {
-        require(stakingContractAddress == address(0), "E04: Staking contract already set");
+        if (_stakingAddress == address(0)) {
+            revert("E01: Staking contract address can't be zero");
+        }
+        if (stakingContractAddress != address(0)) {
+            revert("E02: Staking contract already set");
+        }
 
         // Staking contract, exclude from fee
         stakingContractAddress = _stakingAddress;

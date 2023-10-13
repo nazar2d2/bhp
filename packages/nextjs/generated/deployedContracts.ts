@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         Locker: {
-          address: "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+          address: "0x95401dc811bb5740090279Ba06cfA8fcF6113778",
           abi: [
             {
               inputs: [],
@@ -178,7 +178,7 @@ const contracts = {
           ],
         },
         Staking: {
-          address: "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+          address: "0xf5059a5D33d5853360D16C683c16e67980206f36",
           abi: [
             {
               inputs: [
@@ -589,7 +589,7 @@ const contracts = {
           ],
         },
         TokenBHP: {
-          address: "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+          address: "0x851356ae760d987E095750cCeb3bC6014560891C",
           abi: [
             {
               inputs: [
@@ -1310,7 +1310,7 @@ const contracts = {
           ],
         },
         TokenPresale: {
-          address: "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+          address: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
           abi: [
             {
               inputs: [

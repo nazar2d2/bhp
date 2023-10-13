@@ -212,8 +212,8 @@ contract Staking is ReentrancyGuard, Ownable {
         }
 
         uint256 _userWeight = _getUserWeight(userStake.deposited, userStake.startStaking);
-        uint256 _userWeightInPoolPct = _userWeight * 1 ether / _getTotalUsersWeightUpdated(_user);
-        uint256 _rewards = (_userWeightInPoolPct * rewardsPerSecond * (_lastRewardsTimestamp - _startRewardsTimestamp)) / 1 ether;
+        uint256 _userWeightInPool = _userWeight * 1 ether / _getTotalUsersWeightUpdated(_user);
+        uint256 _rewards = (_userWeightInPool * rewardsPerSecond * (_lastRewardsTimestamp - _startRewardsTimestamp)) / 1 ether;
 
         // 10% penalty for early withdrawal
         uint256 _stakingDuration = block.timestamp - userStake.startStaking;
@@ -232,9 +232,9 @@ contract Staking is ReentrancyGuard, Ownable {
         Stake storage userStake = userStakes[_user];
         uint256 _userWeight = _getUserWeight(userStake.deposited, userStake.startStaking);
         uint256 _userWeightInPool = _userWeight * 1 ether / _getTotalUsersWeightUpdated(_user);
-        uint256 _rewards30d = (_userWeightInPool * rewardsPerSecond * 30 days) / 1 ether;
-
-        return _rewards30d * 12 * 100;
+        uint256 _rewards30d = _userWeightInPool * rewardsPerSecond * 30 days;
+        
+        return ((_rewards30d / userStake.deposited) * 365 * 100) / 1 ether;
     }
 
     // -------------------- Private ----------------------

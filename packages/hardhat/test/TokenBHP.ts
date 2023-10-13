@@ -39,7 +39,7 @@ describe("TokenBHP", function () {
     let tokenBHP: TokenBHP;
 
     beforeEach(async function () {
-      [tokenBHP,] = await loadFixture(deployFixture)
+      [tokenBHP] = await loadFixture(deployFixture);
     });
 
     it("Should have the name Token", async function () {
@@ -65,7 +65,7 @@ describe("TokenBHP", function () {
     let vestingSupply: BigNumber;
 
     beforeEach(async function () {
-      [tokenBHP,] = await loadFixture(deployFixture);
+      [tokenBHP] = await loadFixture(deployFixture);
       totalSupply = await tokenBHP.MAX_SUPPLY();
 
       const distributionSupply = totalSupply.div(5);
@@ -259,5 +259,4 @@ describe("TokenBHP", function () {
       await expect(tokenBHP.connect(acc1).preSaleMint(mint2Amount)).to.be.revertedWith("E03: Presale limit reached");
     });
   });
-
 });

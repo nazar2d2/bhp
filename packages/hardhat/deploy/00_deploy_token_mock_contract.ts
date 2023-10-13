@@ -1,6 +1,7 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { DeployFunction } from "hardhat-deploy/types";
+import { network } from "hardhat";
 
+import { DeployFunction } from "hardhat-deploy/types";
 import "@nomiclabs/hardhat-ethers/internal/type-extensions";
 import "hardhat-deploy/dist/src/type-extensions";
 
@@ -15,12 +16,14 @@ const deployMultiSigContract: DeployFunction = async function (hre: HardhatRunti
   const { deploy } = hre.deployments;
   const [owner, recipient] = await hre.ethers.getSigners();
 
-  await deploy("TokenPresale", {
-    from: deployer,
-    args: [owner.address, recipient.address],
-    log: true,
-    autoMine: true,
-  });
+  if (network.name === "localhost") {
+    await deploy("TokenPresale", {
+      from: deployer,
+      args: [owner.address, recipient.address],
+      log: true,
+      autoMine: true,
+    });
+  }
 };
 
 export default deployMultiSigContract;

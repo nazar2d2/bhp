@@ -15,11 +15,11 @@ const deployBHPContract: DeployFunction = async function (hre: HardhatRuntimeEnv
   const { deploy } = hre.deployments;
   const [owner, acc1] = await hre.ethers.getSigners();
 
-  let multiSignAddress = "";
-  const tokenPresale = await hre.ethers.getContract("TokenPresale", deployer);
+  let multiSignAddress;
 
   let preSaleToken = "";
   if (network.name === "localhost") {
+    const tokenPresale = await hre.ethers.getContract("TokenPresale", deployer);
     preSaleToken = tokenPresale.address;
     multiSignAddress = acc1.address;
   } else if (network.name === "sepolia") {
