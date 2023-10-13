@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { TokenBHP, Staking } from "../typechain-types";
-import { formatEther, parseEther } from "ethers/lib/utils";
+import { formatEther } from "ethers/lib/utils";
 
 const TEST_ADDRESS = "0x0000000000000000000000000000000000000001";
 
@@ -28,7 +28,6 @@ describe("Staking", function () {
   }
 
   describe("Deployment", function () {
-
     let tokenBHP: TokenBHP;
     let staking: Staking;
 
@@ -75,9 +74,10 @@ describe("Staking", function () {
     });
 
     it("Should transfer amount", async function () {
-      await expect(staking.deposit(amount)).to.changeTokenBalances(tokenBHP,
+      await expect(staking.deposit(amount)).to.changeTokenBalances(
+        tokenBHP,
         [signer, staking],
-        [amount.mul(-1), amount]
+        [amount.mul(-1), amount],
       );
     });
 
@@ -137,12 +137,9 @@ describe("Staking", function () {
 
     describe("Events", function () {
       it("Should emit Deposit event", async function () {
-        await expect(staking.deposit(amount)).to.emit(staking, "Deposit").withArgs(
-          signer.address, amount
-        );
+        await expect(staking.deposit(amount)).to.emit(staking, "Deposit").withArgs(signer.address, amount);
       });
     });
-
   });
 
   describe("Rewards", function () {
@@ -357,7 +354,8 @@ describe("Staking", function () {
     });
 
     it("should change token balances", async function () {
-      await expect(staking.claimRewards()).to.changeTokenBalances(tokenBHP,
+      await expect(staking.claimRewards()).to.changeTokenBalances(
+        tokenBHP,
         [signer, staking],
         [reward, reward.mul(-1)],
       );
@@ -394,9 +392,7 @@ describe("Staking", function () {
 
     describe("Events", function () {
       it("Should emit Claim event", async function () {
-        await expect(staking.claimRewards()).to.emit(staking, "ClaimRewards").withArgs(
-          signer.address, reward
-        )
+        await expect(staking.claimRewards()).to.emit(staking, "ClaimRewards").withArgs(signer.address, reward);
       });
     });
   });
@@ -422,7 +418,8 @@ describe("Staking", function () {
 
     it("Should change token balances", async function () {
       const amountWithdraw = amount.div(2);
-      await expect(staking.withdraw(amountWithdraw)).to.changeTokenBalances(tokenBHP,
+      await expect(staking.withdraw(amountWithdraw)).to.changeTokenBalances(
+        tokenBHP,
         [signer, staking],
         [amountWithdraw, amountWithdraw.mul(-1)],
       );
@@ -467,11 +464,8 @@ describe("Staking", function () {
 
     describe("Events", function () {
       it("Should emit Withdraw event", async function () {
-        await expect(staking.withdraw(amount)).to.emit(staking, "Withdraw").withArgs(
-          signer.address, amount
-        )
+        await expect(staking.withdraw(amount)).to.emit(staking, "Withdraw").withArgs(signer.address, amount);
       });
     });
   });
-
 });

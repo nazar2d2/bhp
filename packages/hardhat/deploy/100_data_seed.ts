@@ -17,7 +17,6 @@ const dataSeed: DeployFunction = async function (hre: HardhatRuntimeEnvironment)
 
   await tokenBHP.setStakingContractAddress(staking.address);
   console.log(`> Staking contract addresses updated`);
-
 };
 
 export default dataSeed;

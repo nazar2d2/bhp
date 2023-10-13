@@ -24,10 +24,10 @@ const deployBHPContract: DeployFunction = async function (hre: HardhatRuntimeEnv
     multiSignAddress = acc1.address;
   } else if (network.name === "sepolia") {
     preSaleToken = "0x7169d38820dfd117c3fa1f22a697dba58d90ba06";
-    multiSignAddress = "0xbB714aeFab7513DA5e7Cab590628B795a70Bb51F"
+    multiSignAddress = "0xbB714aeFab7513DA5e7Cab590628B795a70Bb51F";
   } else {
     preSaleToken = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
-    multiSignAddress = "0xbB714aeFab7513DA5e7Cab590628B795a70Bb51F"
+    multiSignAddress = "0xbB714aeFab7513DA5e7Cab590628B795a70Bb51F";
   }
 
   console.log(`> Set multiSign address: ${multiSignAddress}`);
