@@ -70,7 +70,10 @@ describe("TokenBHP", function () {
 
       // check in 365 days
       await time.increase(3600 * 24 * 365);
-      await expect(locker.withdrawTokens(tokenBHP.address)).to.be.rejectedWith("Locker: Lock period has not ended yet");
+      await expect(locker.withdrawTokens(tokenBHP.address)).to.be.revertedWithCustomError(
+        locker,
+        "Locker_LockPeriodNotEnded",
+      );
     });
 
     it(`Should not allow withdraw 2 times`, async function () {
@@ -79,9 +82,7 @@ describe("TokenBHP", function () {
       await time.increase(3600 * 24 * 365 * lockYears);
       await locker.withdrawTokens(tokenBHP.address);
 
-      await expect(locker.withdrawTokens(tokenBHP.address)).to.be.rejectedWith(
-        "Locker: No deposit found for this token",
-      );
+      await expect(locker.withdrawTokens(tokenBHP.address)).to.be.rejectedWith("Locker_NoDepositForToken");
     });
 
     it(`Should allow unlock in ${lockYears} years`, async function () {

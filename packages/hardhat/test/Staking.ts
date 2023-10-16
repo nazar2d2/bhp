@@ -458,7 +458,7 @@ describe("Staking", function () {
 
     describe("Validations", function () {
       it("Should revert if amount gt balanceOf(address)", async function () {
-        await expect(staking.withdraw(amount.add(1))).to.be.revertedWith("E06: Can't withdraw more than you have");
+        await expect(staking.withdraw(amount.add(1))).to.be.revertedWithCustomError(staking, "Staking_WithdrawAmount");
       });
     });
 

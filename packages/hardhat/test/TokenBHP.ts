@@ -256,7 +256,10 @@ describe("TokenBHP", function () {
       const price2 = await tokenBHP.getPreSalePrice(mint2Amount);
       await tokenPresale.connect(acc1).approve(tokenBHP.address, price2);
 
-      await expect(tokenBHP.connect(acc1).preSaleMint(mint2Amount)).to.be.revertedWith("E03: Presale limit reached");
+      await expect(tokenBHP.connect(acc1).preSaleMint(mint2Amount)).to.be.revertedWithCustomError(
+        tokenBHP,
+        "Token_PresaleLimitReached",
+      );
     });
   });
 });

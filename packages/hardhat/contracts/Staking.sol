@@ -73,7 +73,6 @@ contract Staking is ReentrancyGuard, Ownable {
     // Deposit tokens to the contract, start/update staking
     function deposit(uint256 _amount)
     external
-    nonReentrant
     whenNotPaused
     {
         if (_amount == 0) {
@@ -153,6 +152,7 @@ contract Staking is ReentrancyGuard, Ownable {
         _updateUserWeight(userStake);
 
         _transferTokens(msg.sender, _amount);
+
         emit Withdraw(msg.sender, _amount);
     }
 
@@ -183,6 +183,7 @@ contract Staking is ReentrancyGuard, Ownable {
 
         _updateUserWeight(userStake);
         _transferTokens(msg.sender, _amount);
+
         emit Withdraw(msg.sender, _amount);
     }
 
@@ -238,7 +239,10 @@ contract Staking is ReentrancyGuard, Ownable {
         return _rewards;
     }
 
-    function getApy(address _user) external view returns (uint256) {
+    function getApy(address _user)
+    external view
+    returns (uint256)
+    {
         if (stakingStartTime == 0 || block.timestamp >= stakingEndTime || totalUsersWeight == 0 || block.timestamp < stakingStartTime) {
             return 0;
         }
