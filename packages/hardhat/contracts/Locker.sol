@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.21;
 
+import "./helpers/errors.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Locker {
@@ -21,10 +22,10 @@ contract Locker {
         IERC20 _token = IERC20(_tokenAddress);
         Deposit storage deposit = deposits[_tokenAddress][msg.sender];
         if (deposit.lockEndTime == 0) {
-            revert("Locker: No deposit found for this token");
+            revert Locker_NoDepositForToken();
         }
         if (block.timestamp < deposit.lockEndTime) {
-            revert("Locker: Lock period has not ended yet");
+            revert Locker_LockPeriodNotEnded();
         }
         _;
     }
@@ -33,20 +34,22 @@ contract Locker {
     external
     {
         if (_amount == 0) {
-            revert("Locker: Amount must be greater than 0");
+            revert Locker_WrongInputUint();
         }
         if (_tokenAddress == address(0)) {
-            revert("Locker: Token address must be specified");
+            revert Locker_WrongInputAddress();
         }
         if (_lockDurationInYears == 0) {
-            revert("Locker: Lock duration must be greater than 0");
+            revert Locker_WrongLockDuration();
         }
 
         uint256 _lockDuration = _lockDurationInYears * 365 days;
         uint256 _lockEndTime = block.timestamp + _lockDuration;
 
         IERC20 _token = IERC20(_tokenAddress);
-        require(_token.transferFrom(msg.sender, address(this), _amount), "Locker: Transfer failed");
+        if (!_token.transferFrom(msg.sender, address(this), _amount)) {
+            revert Locker_TransferFailed(address(this), _amount);
+        }
 
         Deposit storage deposit = deposits[_tokenAddress][msg.sender];
         if (deposit.amount > 0) {
@@ -64,10 +67,10 @@ contract Locker {
     {
         Deposit storage deposit = deposits[_tokenAddress][msg.sender];
         if (_tokenAddress == address(0)) {
-            revert("Locker: Token address must be specified");
+            revert Locker_WrongInputAddress();
         }
         if (deposit.amount == 0) {
-            revert("Locker: No deposit found for this token");
+            revert Locker_NoDepositForToken();
         }
 
         uint256 _amount = deposit.amount;
@@ -75,7 +78,9 @@ contract Locker {
         deposit.lockEndTime = 0;
 
         IERC20 _token = IERC20(_tokenAddress);
-        require(_token.transfer(msg.sender, _amount), "Locker: Transfer failed");
+        if (!_token.transfer(msg.sender, _amount)) {
+            revert Locker_TransferFailed(msg.sender, _amount);
+        }
 
         emit TokensWithdrawn(msg.sender, _amount, _tokenAddress);
     }
@@ -93,7 +98,7 @@ contract Locker {
     {
         Deposit storage deposit = deposits[_tokenAddress][_owner];
         if (deposit.amount == 0) {
-            revert("Locker: No deposit found for this token");
+            revert Locker_NoDepositForToken();
         }
 
         return deposit.lockEndTime;

@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./helpers/errors.sol";
 
 contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     using SafeERC20 for IERC20;
@@ -31,6 +32,8 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     // PreSale
     uint256 public presaleMinted;
 
+    event PresaleMinted(address indexed user, uint256 amount);
+
     constructor(
         address _initialOwner, string memory _name, string memory _symbol,
         address _multiSignAddress, address _preSaleAddress
@@ -52,6 +55,7 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
         // Mint 20% from Marketing (4% from total) + 20% from Ecosystem (4% from total), rest amount by vesting
         _mint(multiSignContractAddress, marketingEcosystemUnlocked * 2);
 
+        // exclude mint new tokens fees
         excludedFromFee[address(0)] = true;
     }
 
@@ -76,7 +80,7 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     external
     {
         if (multiSignContractAddress == address(0)) {
-            revert("E01: MultiSign contract not set");
+            revert Token_MultisigNotSet();
         }
 
         uint256 _availableForMint = getEcosystemUnlocked();
@@ -100,7 +104,7 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     external
     {
         if (multiSignContractAddress == address(0)) {
-            revert("E01: MultiSign contract not set");
+            revert Token_MultisigNotSet();
         }
 
         uint256 _availableForMint = getMarketingUnlocked();
@@ -146,12 +150,11 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     external
     {
         uint256 _amountWei = uint256(_amount) * 10 ** 18;
-
         if (_amount == 0) {
-            revert("E03: Amount can't be zero");
+            revert Token_WrongInputUint();
         }
         if (presaleMinted + _amountWei > oneDistributionPart) {
-            revert("E03: Presale limit reached");
+            revert Token_PresaleLimitReached();
         }
 
         uint256 _totalPrice = getPreSalePrice(_amount);
@@ -159,6 +162,8 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
 
         presaleMinted += _amountWei;
         _mint(msg.sender, _amountWei);
+
+        emit PresaleMinted(msg.sender, _amount);
     }
 
     // @title Buy BHP tokens for ETH
@@ -167,23 +172,22 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     external payable
     {
         uint256 _amountWei = uint256(_amount) * 10 ** 18;
-
         if (_amount == 0) {
-            revert("E03: Amount can't be zero");
+            revert Token_WrongInputUint();
         }
         if (presaleMinted + _amountWei > oneDistributionPart) {
-            revert("E03: Presale limit reached");
+            revert Token_PresaleLimitReached();
         }
 
-
         uint256 _totalPriceETH = getPreSalePriceEth(_amount);
-
         if (msg.value < _totalPriceETH) {
-            revert("E04: Not enough ETH");
+            revert Token_PresaleNotEnoughETH();
         }
 
         presaleMinted += _amountWei;
         _mint(msg.sender, _amountWei);
+
+        emit PresaleMinted(msg.sender, _amount);
     }
 
     // @title Get pre-sale price for ERC20 token
@@ -240,10 +244,10 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     onlyOwner
     {
         if (_stakingAddress == address(0)) {
-            revert("E01: Staking contract address can't be zero");
+            revert Token_WrongInputAddress();
         }
         if (stakingContractAddress != address(0)) {
-            revert("E02: Staking contract already set");
+            revert Token_StakingAlreadySet();
         }
 
         // Staking contract, exclude from fee

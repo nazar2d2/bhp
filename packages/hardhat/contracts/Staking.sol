@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./helpers/errors.sol";
 
 contract Staking is ReentrancyGuard, Ownable {
     IERC20 public token;
@@ -40,12 +41,16 @@ contract Staking is ReentrancyGuard, Ownable {
     }
 
     modifier whenNotPaused() {
-        require(!isPaused, "E01: Contract is paused.");
+        if (isPaused) {
+            revert Staking_IsPaused();
+        }
         _;
     }
 
     modifier whenPaused() {
-        require(isPaused, "E02: Contract is not paused.");
+        if (!isPaused) {
+            revert Staking_NotPaused();
+        }
         _;
     }
 
@@ -71,8 +76,12 @@ contract Staking is ReentrancyGuard, Ownable {
     nonReentrant
     whenNotPaused
     {
-        require(_amount > 0, "E03: Invalid amount");
-        require(token.transferFrom(msg.sender, address(this), _amount), "E04: Transfer failed");
+        if (_amount == 0) {
+            revert Staking_WrongInputUint();
+        }
+        if (!token.transferFrom(msg.sender, address(this), _amount)) {
+            revert Staking_TransferFailed(address(this), _amount);
+        }
 
         if (stakingStartTime == 0 && totalStaked + _amount >= stakingAmountToStart) {
             stakingStartTime = block.timestamp;
@@ -107,19 +116,20 @@ contract Staking is ReentrancyGuard, Ownable {
     nonReentrant
     {
         Stake storage userStake = userStakes[msg.sender];
-        uint256 rewards = calculateRewards(msg.sender) + userStake.unclaimedRewards;
-        require(rewards > 0, "E05: You have no rewards");
-
-        if (token.balanceOf(address(this)) - totalStaked < rewards) {
-            revert("E09: Not enough tokens in the contract for rewards");
+        uint256 _rewards = calculateRewards(msg.sender) + userStake.unclaimedRewards;
+        if (_rewards == 0) {
+            revert Staking_NoRewards();
+        }
+        if (token.balanceOf(address(this)) - totalStaked < _rewards) {
+            revert Staking_NoSupplyForRewards();
         }
 
         userStake.unclaimedRewards = 0;
         userStake.timeOfLastUpdate = block.timestamp;
         _updateUserWeight(userStake);
 
-        _transferTokens(msg.sender, rewards);
-        emit ClaimRewards(msg.sender, rewards);
+        _transferTokens(msg.sender, _rewards);
+        emit ClaimRewards(msg.sender, _rewards);
     }
 
     // Withdraw specified amount of staked tokens
@@ -128,7 +138,9 @@ contract Staking is ReentrancyGuard, Ownable {
     nonReentrant
     {
         Stake storage userStake = userStakes[msg.sender];
-        require(userStake.deposited >= _amount, "E06: Can't withdraw more than you have");
+        if (userStake.deposited < _amount) {
+            revert Staking_WithdrawAmount();
+        }
 
         uint256 _rewards = calculateRewards(msg.sender);
         userStake.deposited -= _amount;
@@ -150,13 +162,15 @@ contract Staking is ReentrancyGuard, Ownable {
     nonReentrant
     {
         Stake storage userStake = userStakes[msg.sender];
-        require(userStake.deposited > 0, "E07: You have no deposit");
+        if (userStake.deposited == 0) {
+            revert Staking_NoDeposit();
+        }
 
         uint256 _rewards = calculateRewards(msg.sender) + userStake.unclaimedRewards;
         uint256 _deposit = userStake.deposited;
 
         if (token.balanceOf(address(this)) - totalStaked < _rewards) {
-            revert("E09: Not enough tokens in the contract for rewards");
+            revert Staking_NoSupplyForRewards();
         }
 
         // reset reset + reset user multiplier
@@ -233,7 +247,7 @@ contract Staking is ReentrancyGuard, Ownable {
         uint256 _userWeight = _getUserWeight(userStake.deposited, userStake.startStaking);
         uint256 _userWeightInPool = _userWeight * 1 ether / _getTotalUsersWeightUpdated(_user);
         uint256 _rewards30d = _userWeightInPool * rewardsPerSecond * 30 days;
-        
+
         return ((_rewards30d / userStake.deposited) * 365 * 100) / 1 ether;
     }
 
@@ -256,7 +270,9 @@ contract Staking is ReentrancyGuard, Ownable {
     function _transferTokens(address _to, uint256 _amount)
     private
     {
-        require(token.transfer(_to, _amount), "E08: Transfer failed");
+        if (!token.transfer(_to, _amount)) {
+            revert Staking_TransferFailed(_to, _amount);
+        }
     }
 
     function _getUserWeight(uint256 _deposit, uint256 _startStaking)
