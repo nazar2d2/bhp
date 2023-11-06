@@ -43,6 +43,22 @@ describe("Staking", function () {
       expect(await staking.isPaused()).to.eq(false);
     });
 
+    it("Check pause/unpause functionality", async function () {
+      await staking.pause();
+      expect(await staking.isPaused()).to.eq(true);
+
+      await staking.unpause();
+      expect(await staking.isPaused()).to.eq(false);
+    });
+
+    it("Pause don't allow to deposit", async function () {
+      await staking.pause();
+
+      const amount = ethers.utils.parseEther("1000");
+      await tokenBHP.approve(staking.address, amount);
+      expect(staking.deposit(amount)).to.be.revertedWithCustomError(staking, "Staking_IsPaused");
+    });
+
     it("Should have 0 stake balance", async function () {
       expect(await staking.totalStaked()).to.eq(0);
     });
@@ -465,6 +481,17 @@ describe("Staking", function () {
     describe("Events", function () {
       it("Should emit Withdraw event", async function () {
         await expect(staking.withdraw(amount)).to.emit(staking, "Withdraw").withArgs(signer.address, amount);
+      });
+    });
+
+    describe("APY check", function () {
+      it("Should show correct APY", async function () {
+        await tokenBHP.approve(staking.address, amount);
+        await staking.deposit(amount);
+        await time.increase(1);
+
+        const apy = await staking.getApy(signer.address);
+        expect(apy).gt(0);
       });
     });
   });

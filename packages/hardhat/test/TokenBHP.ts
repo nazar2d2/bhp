@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { TokenBHP, TokenPresale } from "../typechain-types";
 import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
-import { formatEther, parseUnits, formatUnits } from "ethers/lib/utils";
+import { formatEther, parseUnits, formatUnits, parseEther } from "ethers/lib/utils";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -56,6 +56,20 @@ describe("TokenBHP", function () {
       const unlockedForEcosystem = totalSupply.div(5).div(5);
 
       expect(await tokenBHP.totalSupply()).to.eq(expectedAmountLP.add(unlockedForMarketing).add(unlockedForEcosystem));
+    });
+
+    it("Exclude from fees", async function () {
+      await time.increase(3600 * 24 * 31 * 10);
+
+      const amount = parseEther("100");
+      await tokenBHP.exclude(acc1.address, true);
+      await tokenBHP.transfer(acc1.address, amount);
+
+      await expect(tokenBHP.transfer(acc1.address, amount)).to.changeTokenBalances(
+        tokenBHP,
+        [owner.address, acc1.address],
+        [amount.mul(-1), amount],
+      );
     });
   });
 
@@ -186,7 +200,7 @@ describe("TokenBHP", function () {
       expect(expectedPrice).to.equal(price);
     });
 
-    it("Buy tokens, up to 20%", async function () {
+    it("Buy tokens using ERC20 token, up to 20%", async function () {
       const [, acc1] = await ethers.getSigners();
 
       const amount = 64700000;
@@ -203,7 +217,22 @@ describe("TokenBHP", function () {
       expect(acc1Balance).to.equal(parseUnits(amount.toString(), 18));
     });
 
-    it("Buy tokens, check payment token balance", async function () {
+    it("Buy tokens using ETH, up to 10%", async function () {
+      const [, acc1] = await ethers.getSigners();
+
+      const amount = 30000000;
+      const price = await tokenBHP.getPreSalePriceEth(amount);
+
+      const expectedPrice = parseUnits("15", 18);
+      expect(expectedPrice).to.equal(price);
+      await tokenBHP.connect(acc1).preSaleMintEth(amount, { value: price });
+
+      // Check user balance, should have paid tokens
+      const acc1Balance = await tokenBHP.balanceOf(acc1.address);
+      expect(acc1Balance).to.equal(parseUnits(amount.toString(), 18));
+    });
+
+    it("Buy tokens using ERC20 token, check payment token balance", async function () {
       const [, acc1] = await ethers.getSigners();
 
       const amount = 99900000;
@@ -218,7 +247,7 @@ describe("TokenBHP", function () {
       expect(paymentInitBalance.sub(price)).to.equal(paymentUpdatedBalance);
     });
 
-    it("Buy tokens, up to 40%", async function () {
+    it("Buy tokens using ERC20 token, up to 40%", async function () {
       const [, acc1] = await ethers.getSigners();
 
       const amount = 50000000;
@@ -239,7 +268,20 @@ describe("TokenBHP", function () {
       expect(acc1Balance).to.equal(parseUnits((amount * 2).toString(), 18));
     });
 
-    it("Buy tokens, try to by more than expected", async function () {
+    it("Buy tokens using ERC20 token, up to 80%", async function () {
+      const [, acc1] = await ethers.getSigners();
+
+      const amount = 64600000;
+      const price = await tokenBHP.getPreSalePrice(amount);
+      await tokenPresale.connect(acc1).approve(tokenBHP.address, price);
+      await tokenBHP.connect(acc1).preSaleMint(amount);
+
+      // Second mint, same amount shout cost 3 times more - more than 20% sold
+      const price2 = await tokenBHP.getPreSalePrice(amount * 3);
+      expect(price2).to.equal(price.mul(3).mul(13));
+    });
+
+    it("Buy tokens using ERC20 token, try to by more than expected", async function () {
       const [, acc1] = await ethers.getSigners();
 
       const presaleTokensWei = totalSupply.div(5).toString();

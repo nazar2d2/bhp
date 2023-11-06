@@ -222,13 +222,13 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
         return (_totalPriceUSD * 10 ** 12) / 2000;
     }
 
-    receive()
-    external payable
-    {}
-
-    fallback()
-    external payable
-    {}
+//    receive()
+//    external payable
+//    {}
+//
+//    fallback()
+//    external payable
+//    {}
 
     // ------------------ Only Owner ------------------
 
