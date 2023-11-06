@@ -17,7 +17,7 @@ const deployMultiSigContract: DeployFunction = async function (hre: HardhatRunti
   const [owner, recipient] = await hre.ethers.getSigners();
 
   if (network.name === "localhost") {
-    await deploy("TokenPresale", {
+    await deploy("TokenPresaleMock", {
       from: deployer,
       args: [owner.address, recipient.address],
       log: true,
@@ -30,4 +30,4 @@ export default deployMultiSigContract;
 
 // Tags are useful if you have multiple deploy files and only want to run one of them.
 // e.g. yarn deploy --tags YourContract
-deployMultiSigContract.tags = ["TokenPresale"];
+deployMultiSigContract.tags = ["TokenPresaleMock"];

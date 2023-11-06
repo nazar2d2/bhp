@@ -4,6 +4,7 @@ pragma solidity 0.8.21;
 // Token
     error Token_MultisigNotSet();
     error Token_WrongInputAddress();
+    error Token_GovernanceAlreadySet();
     error Token_WrongInputUint();
     error Token_PresaleLimitReached();
     error Token_PresaleNotEnoughETH();

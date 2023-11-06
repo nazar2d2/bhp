@@ -13,10 +13,13 @@ const dataSeed: DeployFunction = async function (hre: HardhatRuntimeEnvironment)
 
   const tokenBHP = await hre.ethers.getContract("TokenBHP", deployer);
   const staking = await hre.ethers.getContract("Staking", deployer);
-  // const multiSignContract = await hre.ethers.getContract("MultiSigContract", deployer);
+  const tokenJOMO = await hre.ethers.getContract("TokenJOMO", deployer);
 
   await tokenBHP.setStakingContractAddress(staking.address);
-  console.log(`> Staking contract addresses updated`);
+  console.log(`> Staking contract address updated`);
+
+  await tokenBHP.setGovernanceTokenAddress(tokenJOMO.address);
+  console.log(`> Governance contract address updated`);
 };
 
 export default dataSeed;

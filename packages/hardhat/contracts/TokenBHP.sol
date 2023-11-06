@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./helpers/errors.sol";
+import "./TokenJOMO.sol";
 
 contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     using SafeERC20 for IERC20;
@@ -19,6 +20,7 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     mapping(address => bool) public excludedFromFee;
 
     address private stakingContractAddress;
+    address private governanceContractAddress;
     address private multiSignContractAddress;
     address private preSalePaymentToken;
     uint256 private feeEnabledAfter;
@@ -65,6 +67,16 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     internal
     override(ERC20)
     {
+        if (governanceContractAddress != address(0)) {
+            TokenJOMO _govToken = TokenJOMO(governanceContractAddress);
+            if (_from != address(0) && _from != stakingContractAddress) {
+                _govToken.updateRewards(_from);
+            }
+            if (_to != address(0) && _to != stakingContractAddress) {
+                _govToken.updateRewards(_to);
+            }
+        }
+
         if (excludedFromFee[_from] || excludedFromFee[_to] || block.timestamp < feeEnabledAfter) {
             super._update(_from, _to, _value);
             return;
@@ -208,9 +220,9 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
         } else if (_soldPct < 60 * _denominator) {
             return 8 * _priceOne * _amount;
         } else if (_soldPct < 80 * _denominator) {
-            return 13 * _priceOne * _amount;
+            return 21 * _priceOne * _amount;
         }
-        return 21 * _priceOne * _amount;
+        return 34 * _priceOne * _amount;
     }
 
     // @title Get pre-sale price for ETH
@@ -237,6 +249,20 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     onlyOwner
     {
         excludedFromFee[_addr] = _status;
+    }
+
+
+    function setGovernanceTokenAddress(address _govAddress)
+    external
+    onlyOwner
+    {
+        if (_govAddress == address(0)) {
+            revert Token_WrongInputAddress();
+        }
+        if (governanceContractAddress != address(0)) {
+            revert Token_GovernanceAlreadySet();
+        }
+        governanceContractAddress = _govAddress;
     }
 
     function setStakingContractAddress(address _stakingAddress)

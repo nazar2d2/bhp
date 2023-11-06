@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TokenPresale is ERC20, ERC20Burnable, Ownable {
+contract TokenPresaleMock is ERC20, ERC20Burnable, Ownable {
     constructor(address _initialOwner, address _recipient)
     ERC20("Token mockup", "tUSDT")
     Ownable(_initialOwner)

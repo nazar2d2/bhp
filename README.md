@@ -52,6 +52,7 @@ Run smart contract test with `yarn hardhat:test`
 
 ``` 
 yarn deploy --network sepolia --reset
+yarn verify --network sepolia
 ```
 
 ### Mythril Analize:
