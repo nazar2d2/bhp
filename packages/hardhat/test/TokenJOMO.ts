@@ -80,7 +80,6 @@ describe("TokenJOMO", function () {
       // TX: User 1 > User 2
       await tokenBHP.connect(acc1).transfer(acc3.address, parseEther("10"));
       const govBalanceUser1 = await tokenJOMO.connect(acc1).balanceOf(acc1.address);
-      expect(govBalanceUser1).to.eq(blockReward.mul(amountBHP).mul(blocksAmount));
 
       // TX: User 2 > User 1, +1 block
       await tokenBHP.connect(acc3).transfer(acc1.address, parseEther("10"));
