@@ -60,4 +60,5 @@ yarn verify --network sepolia
 ``` 
 docker run -v $(pwd):/tmp mythril/myth analyze /tmp/packages/hardhat/contracts/Staking.sol --solc-json /tmp/solc-mapping.json
 docker run -v $(pwd):/tmp mythril/myth analyze /tmp/packages/hardhat/contracts/TokenBHP.sol --solc-json /tmp/solc-mapping.json
+docker run -v $(pwd):/tmp mythril/myth analyze /tmp/packages/hardhat/contracts/TokenJOMO.sol --solc-json /tmp/solc-mapping.json
 ```
