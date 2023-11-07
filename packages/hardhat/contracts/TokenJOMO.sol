@@ -19,7 +19,7 @@ contract TokenJOMO is ERC20 {
 
     function updateRewards(address _userAddress) external {
         if (msg.sender != tokenBHPAddress) {
-            revert("Only TokenBHP can update rewards");
+            revert("JOMO: Only TokenBHP can update rewards");
         }
 
         if (lastBlockUpdate[_userAddress] > 0) {
@@ -47,7 +47,7 @@ contract TokenJOMO is ERC20 {
         if (_from == address(0)) {
             super._update(_from, _to, _value);
         } else {
-            revert("Token is not transferable");
+            revert("JOMO: Token is not transferable");
         }
     }
 

@@ -91,12 +91,14 @@ describe("TokenJOMO", function () {
       expect(govBalanceUser2).to.eq(blockReward.mul(10).mul(1));
     });
 
-    // it("Error on transfer", async function () {
-    //
-    // });
-    //
-    // it("Error on call updateRewards from wrong user", async function () {
-    //
-    // });
+    it("Error on transfer", async function () {
+      expect(tokenJOMO.transfer(acc3.address, 1)).to.be.revertedWith("JOMO: Token is not transferable");
+    });
+
+    it("Error on call updateRewards from wrong user", async function () {
+      expect(tokenJOMO.connect(acc3).updateRewards(acc3.address)).to.be.revertedWith(
+        "JOMO: Only TokenBHP can update rewards",
+      );
+    });
   });
 });
