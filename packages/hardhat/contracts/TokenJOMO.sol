@@ -7,7 +7,7 @@ import "./helpers/errors.sol";
 import "./TokenBHP.sol";
 
 contract TokenJOMO is ERC20 {
-    uint64 public constant BLOCK_REWARD = 10000000000000;
+    uint64 public constant BLOCK_REWARD = 1000000000000;
     address private immutable tokenBHPAddress;
     mapping(address => uint32) private lastBlockUpdate;
 
