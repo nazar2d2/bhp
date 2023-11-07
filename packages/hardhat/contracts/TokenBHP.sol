@@ -70,10 +70,10 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
         if (governanceContractAddress != address(0)) {
             TokenJOMO _govToken = TokenJOMO(governanceContractAddress);
             if (_from != address(0) && _from != stakingContractAddress) {
-                _govToken.updateRewards(_from);
+                _govToken.mintRewards(_from);
             }
             if (_to != address(0) && _to != stakingContractAddress) {
-                _govToken.updateRewards(_to);
+                _govToken.mintRewards(_to);
             }
         }
 

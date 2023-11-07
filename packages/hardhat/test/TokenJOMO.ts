@@ -96,7 +96,7 @@ describe("TokenJOMO", function () {
     });
 
     it("Error on call updateRewards from wrong user", async function () {
-      expect(tokenJOMO.connect(acc3).updateRewards(acc3.address)).to.be.revertedWith(
+      expect(tokenJOMO.connect(acc3).mintRewards(acc3.address)).to.be.revertedWith(
         "JOMO: Only TokenBHP can update rewards",
       );
     });

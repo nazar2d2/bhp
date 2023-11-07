@@ -17,22 +17,16 @@ contract TokenJOMO is ERC20 {
         tokenBHPAddress = _tokenBHPAddress;
     }
 
-    function updateRewards(address _userAddress) external {
+    function mintRewards(address _userAddress) external {
         if (msg.sender != tokenBHPAddress) {
             revert("JOMO: Only TokenBHP can update rewards");
         }
 
         if (lastBlockUpdate[_userAddress] > 0) {
             TokenBHP _tokenBHP = TokenBHP(tokenBHPAddress);
+            uint32 _blocksDiff = uint32(block.number) - lastBlockUpdate[_userAddress];
             uint256 _userBalance = _tokenBHP.balanceOf(_userAddress);
-            uint256 _blocksDiff = block.number - lastBlockUpdate[_userAddress];
-
             uint256 _govAmount = (_blocksDiff * BLOCK_REWARD * _userBalance) / 10 ** 18;
-//            console.log('_userAddress', _userAddress);
-//            console.log('_userBalance', _userBalance);
-//            console.log('_blocksDiff', _blocksDiff);
-//            console.log('_govAmount', _govAmount);
-//            console.log('-----------------------');
 
             _mint(_userAddress, _govAmount);
         }
