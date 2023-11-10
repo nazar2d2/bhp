@@ -2300,7 +2300,7 @@ const contracts = {
       name: "sepolia",
       contracts: {
         Locker: {
-          address: "0x0aA11Ef4017598Aea6926382A16b9163f224655F",
+          address: "0x7A198243585FcE14f2B6e40aC2B06eA4413b6C52",
           abi: [
             {
               inputs: [],
@@ -2411,9 +2411,9 @@ const contracts = {
                   type: "uint256",
                 },
                 {
-                  internalType: "uint256",
+                  internalType: "uint8",
                   name: "_lockDurationInYears",
-                  type: "uint256",
+                  type: "uint8",
                 },
               ],
               name: "depositTokens",
@@ -2447,9 +2447,9 @@ const contracts = {
                   type: "uint256",
                 },
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "lockEndTime",
-                  type: "uint256",
+                  type: "uint64",
                 },
               ],
               stateMutability: "view",
@@ -2490,9 +2490,9 @@ const contracts = {
               name: "getUnlockTime",
               outputs: [
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "",
-                  type: "uint256",
+                  type: "uint64",
                 },
               ],
               stateMutability: "view",
@@ -2514,7 +2514,7 @@ const contracts = {
           ],
         },
         Staking: {
-          address: "0x1349F8ce9d8c1E81611519dBE13773E28F6ab04D",
+          address: "0xB341A154033483cB52C0c249a2cBe2f732222473",
           abi: [
             {
               inputs: [
@@ -2820,9 +2820,9 @@ const contracts = {
               name: "stakingEndTime",
               outputs: [
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "",
-                  type: "uint256",
+                  type: "uint64",
                 },
               ],
               stateMutability: "view",
@@ -2833,9 +2833,9 @@ const contracts = {
               name: "stakingStartTime",
               outputs: [
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "",
-                  type: "uint256",
+                  type: "uint64",
                 },
               ],
               stateMutability: "view",
@@ -2872,9 +2872,9 @@ const contracts = {
               name: "totalUsersWeight",
               outputs: [
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "",
-                  type: "uint256",
+                  type: "uint64",
                 },
               ],
               stateMutability: "view",
@@ -2916,14 +2916,14 @@ const contracts = {
                   type: "uint256",
                 },
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "startStaking",
-                  type: "uint256",
+                  type: "uint64",
                 },
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "timeOfLastUpdate",
-                  type: "uint256",
+                  type: "uint64",
                 },
                 {
                   internalType: "uint256",
@@ -2945,9 +2945,9 @@ const contracts = {
               name: "userWeight",
               outputs: [
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "",
-                  type: "uint256",
+                  type: "uint64",
                 },
               ],
               stateMutability: "view",
@@ -2976,7 +2976,7 @@ const contracts = {
           ],
         },
         TokenBHP: {
-          address: "0x1969A2313fC4Acb001304925d07aB493d4e708DB",
+          address: "0x63a7Fc9d5f0DdB76593088817562F73CFb99EB1E",
           abi: [
             {
               inputs: [
@@ -3788,7 +3788,7 @@ const contracts = {
           ],
         },
         TokenJOMO: {
-          address: "0x4Bddb93B56689E89e71Fa398da3b8853aBFE6CC0",
+          address: "0xE14508AdD720Ad77A1d9A8aA02CD40214415193C",
           abi: [
             {
               inputs: [

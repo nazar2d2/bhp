@@ -26,7 +26,7 @@ contract TokenJOMO is ERC20 {
             TokenBHP _tokenBHP = TokenBHP(tokenBHPAddress);
             uint32 _blocksDiff = uint32(block.number) - lastBlockUpdate[_userAddress];
             uint256 _userBalance = _tokenBHP.balanceOf(_userAddress);
-            uint256 _govAmount = (_blocksDiff * BLOCK_REWARD * _userBalance) / 10 ** 18;
+            uint256 _govAmount = (uint256(_blocksDiff * BLOCK_REWARD) * _userBalance) / 10 ** 18;
 
             _mint(_userAddress, _govAmount);
         }
