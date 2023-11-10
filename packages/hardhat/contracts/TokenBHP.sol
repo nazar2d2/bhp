@@ -15,9 +15,7 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     uint256 public constant MAX_SUPPLY = 1618 * 10 ** 6 * 10 ** 18;
     uint256 private constant oneDistributionPart = MAX_SUPPLY / 5;
     uint256 private constant marketingEcosystemUnlocked = oneDistributionPart / 5;
-
     uint256 public constant timeWithoutFee = 30 days * 6;
-    mapping(address => bool) public excludedFromFee;
 
     address private stakingContractAddress;
     address private governanceContractAddress;
@@ -25,14 +23,13 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     address private preSalePaymentToken;
     uint256 private feeEnabledAfter;
 
-    // Ecosystem rewards & Marketing vesting
     uint64 public vestingStart;
     uint64 public vestingEnd;
     uint256 public ecosystemVestingMinted;
     uint256 public marketingVestingMinted;
-
-    // PreSale
     uint256 public presaleMinted;
+
+    mapping(address => bool) public excludedFromFee;
 
     event PresaleMinted(address indexed user, uint256 amount);
 
@@ -230,17 +227,8 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     public view
     returns (uint256)
     {
-        uint256 _totalPriceUSD = getPreSalePrice(_amount);
-        return (_totalPriceUSD * 10 ** 12) / 2000;
+        return (getPreSalePrice(_amount) * 10 ** 12) / 2000;
     }
-
-//    receive()
-//    external payable
-//    {}
-//
-//    fallback()
-//    external payable
-//    {}
 
     // ------------------ Only Owner ------------------
 

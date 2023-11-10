@@ -14,18 +14,19 @@ contract Staking is ReentrancyGuard, Ownable {
     bool public isPaused = false;
     uint256 public rewardsPerSecond = 4.1538 ether;
     uint256 public constant stakingAmountToStart = 21 * 10 ** 6 * 10 ** 18; // 21M tokens
-    uint256 public stakingStartTime = 0;
-    uint256 public stakingEndTime = 0;
+
+    uint64 public stakingStartTime = 0;
+    uint64 public stakingEndTime = 0;
+    uint64 public totalUsersWeight = 0;
     uint256 public totalStaked = 0;
-    uint256 public totalUsersWeight = 0;
 
     mapping(address => Stake) public userStakes;
-    mapping(address => uint256) public userWeight;
+    mapping(address => uint64) public userWeight;
 
     struct Stake {
         uint256 deposited;
-        uint256 startStaking;
-        uint256 timeOfLastUpdate;
+        uint64 startStaking;
+        uint64 timeOfLastUpdate;
         uint256 unclaimedRewards;
     }
 
@@ -83,8 +84,8 @@ contract Staking is ReentrancyGuard, Ownable {
         }
 
         if (stakingStartTime == 0 && totalStaked + _amount >= stakingAmountToStart) {
-            stakingStartTime = block.timestamp;
-            stakingEndTime = block.timestamp + 900 days;
+            stakingStartTime = uint64(block.timestamp);
+            stakingEndTime = uint64(block.timestamp) + 900 days;
         }
 
         Stake storage userStake = userStakes[msg.sender];
@@ -92,15 +93,15 @@ contract Staking is ReentrancyGuard, Ownable {
         if (userStake.deposited == 0) {
             // new staking deposit
             userStake.deposited = _amount;
-            userStake.startStaking = block.timestamp;
-            userStake.timeOfLastUpdate = block.timestamp;
+            userStake.startStaking = uint64(block.timestamp);
+            userStake.timeOfLastUpdate = uint64(block.timestamp);
             userStake.unclaimedRewards = 0;
         } else {
             // increase staking deposit
             uint256 rewards = calculateRewards(msg.sender);
             userStake.unclaimedRewards += rewards;
             userStake.deposited += _amount;
-            userStake.timeOfLastUpdate = block.timestamp;
+            userStake.timeOfLastUpdate = uint64(block.timestamp);
         }
 
         _updateUserWeight(userStake);
@@ -124,7 +125,7 @@ contract Staking is ReentrancyGuard, Ownable {
         }
 
         userStake.unclaimedRewards = 0;
-        userStake.timeOfLastUpdate = block.timestamp;
+        userStake.timeOfLastUpdate = uint64(block.timestamp);
         _updateUserWeight(userStake);
 
         _transferTokens(msg.sender, _rewards);
@@ -143,12 +144,12 @@ contract Staking is ReentrancyGuard, Ownable {
 
         uint256 _rewards = calculateRewards(msg.sender);
         userStake.deposited -= _amount;
-        userStake.timeOfLastUpdate = block.timestamp;
+        userStake.timeOfLastUpdate = uint64(block.timestamp);
         userStake.unclaimedRewards = _rewards;
         totalStaked -= _amount;
 
         // reset user multiplier
-        userStake.startStaking = block.timestamp;
+        userStake.startStaking = uint64(block.timestamp);
         _updateUserWeight(userStake);
 
         _transferTokens(msg.sender, _amount);
@@ -176,7 +177,7 @@ contract Staking is ReentrancyGuard, Ownable {
         // reset reset + reset user multiplier
         userStake.deposited = 0;
         userStake.timeOfLastUpdate = 0;
-        userStake.startStaking = block.timestamp;
+        userStake.startStaking = uint64(block.timestamp);
 
         uint256 _amount = _rewards + _deposit;
         totalStaked -= _deposit;
@@ -212,26 +213,26 @@ contract Staking is ReentrancyGuard, Ownable {
 
         Stake storage userStake = userStakes[_user];
 
-        uint256 _startRewardsTimestamp;
+        uint64 _startRewardsTimestamp;
         if (stakingStartTime > userStake.timeOfLastUpdate) {
             _startRewardsTimestamp = stakingStartTime;
         } else {
             _startRewardsTimestamp = userStake.timeOfLastUpdate;
         }
 
-        uint256 _lastRewardsTimestamp;
+        uint64 _lastRewardsTimestamp;
         if (stakingEndTime > block.timestamp) {
-            _lastRewardsTimestamp = block.timestamp;
+            _lastRewardsTimestamp = uint64(block.timestamp);
         } else {
             _lastRewardsTimestamp = stakingEndTime;
         }
 
-        uint256 _userWeight = _getUserWeight(userStake.deposited, userStake.startStaking);
-        uint256 _userWeightInPool = _userWeight * 1 ether / _getTotalUsersWeightUpdated(_user);
-        uint256 _rewards = (_userWeightInPool * rewardsPerSecond * (_lastRewardsTimestamp - _startRewardsTimestamp)) / 1 ether;
+        uint64 _userWeight = _getUserWeight(userStake.deposited, userStake.startStaking);
+        uint256 _userWeightInPool = uint256(_userWeight) * 1 ether / uint256(_getTotalUsersWeightUpdated(_user));
+        uint256 _rewards = (_userWeightInPool * rewardsPerSecond * uint256(_lastRewardsTimestamp - _startRewardsTimestamp)) / 1 ether;
 
         // 10% penalty for early withdrawal
-        uint256 _stakingDuration = block.timestamp - userStake.startStaking;
+        uint64 _stakingDuration = uint64(block.timestamp) - userStake.startStaking;
         if (_stakingDuration < 30 days) {
             _rewards = _rewards * 0.9 ether / 1 ether;
         }
@@ -248,8 +249,8 @@ contract Staking is ReentrancyGuard, Ownable {
         }
 
         Stake storage userStake = userStakes[_user];
-        uint256 _userWeight = _getUserWeight(userStake.deposited, userStake.startStaking);
-        uint256 _userWeightInPool = _userWeight * 1 ether / _getTotalUsersWeightUpdated(_user);
+        uint64 _userWeight = _getUserWeight(userStake.deposited, userStake.startStaking);
+        uint256 _userWeightInPool = uint256(_userWeight) * 1 ether / uint256(_getTotalUsersWeightUpdated(_user));
         uint256 _rewards30d = _userWeightInPool * rewardsPerSecond * 30 days;
 
         return ((_rewards30d / userStake.deposited) * 365 * 100) / 1 ether;
@@ -257,7 +258,7 @@ contract Staking is ReentrancyGuard, Ownable {
 
     // -------------------- Private ----------------------
 
-    function getDurationMultiplier(uint256 _duration)
+    function getDurationMultiplier(uint64 _duration)
     private pure
     returns (uint256) {
         if (_duration < 90 days) {
@@ -279,28 +280,28 @@ contract Staking is ReentrancyGuard, Ownable {
         }
     }
 
-    function _getUserWeight(uint256 _deposit, uint256 _startStaking)
+    function _getUserWeight(uint256 _deposit, uint64 _startStaking)
     private view
-    returns (uint256)
+    returns (uint64)
     {
-        uint256 _stakingDuration = block.timestamp - _startStaking;
-        return ((_deposit * getDurationMultiplier(_stakingDuration)) / 1 ether) / 1 ether;
+        uint64 _stakingDuration = uint64(block.timestamp) - _startStaking;
+        return uint64(((_deposit * getDurationMultiplier(_stakingDuration)) / 1 ether) / 1 ether);
     }
 
     function _getTotalUsersWeightUpdated(address _user)
     private view
-    returns (uint256)
+    returns (uint64)
     {
         Stake storage userStake = userStakes[_user];
-        uint256 _weightBefore = userWeight[_user];
-        uint256 _actualUserWeight = _getUserWeight(userStake.deposited, userStake.startStaking);
+        uint64 _weightBefore = userWeight[_user];
+        uint64 _actualUserWeight = _getUserWeight(userStake.deposited, userStake.startStaking);
         return totalUsersWeight + _actualUserWeight - _weightBefore;
     }
 
     function _updateUserWeight(Stake storage userStake)
     private
     {
-        uint256 _weightBefore = userWeight[msg.sender];
+        uint64 _weightBefore = userWeight[msg.sender];
         userWeight[msg.sender] = _getUserWeight(userStake.deposited, userStake.startStaking);
 
         if (userWeight[msg.sender] > _weightBefore) {

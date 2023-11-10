@@ -10,7 +10,7 @@ contract Locker {
     struct Deposit {
         address owner;
         uint256 amount;
-        uint256 lockEndTime;
+        uint64 lockEndTime;
     }
 
     event TokensDeposited(address indexed owner, uint256 amount, address token);
@@ -30,7 +30,7 @@ contract Locker {
         _;
     }
 
-    function depositTokens(address _tokenAddress, uint256 _amount, uint256 _lockDurationInYears)
+    function depositTokens(address _tokenAddress, uint256 _amount, uint8 _lockDurationInYears)
     external
     {
         if (_amount == 0) {
@@ -43,8 +43,8 @@ contract Locker {
             revert Locker_WrongLockDuration();
         }
 
-        uint256 _lockDuration = _lockDurationInYears * 365 days;
-        uint256 _lockEndTime = block.timestamp + _lockDuration;
+        uint64 _lockDuration = uint64(_lockDurationInYears) * 365 days;
+        uint64 _lockEndTime = uint64(block.timestamp) + _lockDuration;
 
         IERC20 _token = IERC20(_tokenAddress);
         if (!_token.transferFrom(msg.sender, address(this), _amount)) {
@@ -94,7 +94,7 @@ contract Locker {
 
     function getUnlockTime(address _tokenAddress, address _owner)
     public view
-    returns (uint256)
+    returns (uint64)
     {
         Deposit storage deposit = deposits[_tokenAddress][_owner];
         if (deposit.amount == 0) {
