@@ -15,16 +15,17 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     uint256 public constant MAX_SUPPLY = 1618 * 10 ** 6 * 10 ** 18;
     uint256 private constant oneDistributionPart = MAX_SUPPLY / 5;
     uint256 private constant marketingEcosystemUnlocked = oneDistributionPart / 5;
-    uint256 public constant timeWithoutFee = 30 days * 6;
 
     address private stakingContractAddress;
     address private governanceContractAddress;
     address private multiSignContractAddress;
     address private preSalePaymentToken;
-    uint256 private feeEnabledAfter;
 
+    uint64 public constant timeWithoutFee = 30 days * 6;
+    uint64 private feeEnabledAfter;
     uint64 public vestingStart;
     uint64 public vestingEnd;
+
     uint256 public ecosystemVestingMinted;
     uint256 public marketingVestingMinted;
     uint256 public presaleMinted;
@@ -40,7 +41,7 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     ERC20(_name, _symbol)
     Ownable(_initialOwner)
     {
-        feeEnabledAfter = block.timestamp + timeWithoutFee;
+        feeEnabledAfter = uint64(block.timestamp) + uint64(timeWithoutFee);
         multiSignContractAddress = _multiSignAddress;
         preSalePaymentToken = _preSaleAddress;
 

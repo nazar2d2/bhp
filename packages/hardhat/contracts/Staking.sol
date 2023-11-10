@@ -14,11 +14,11 @@ contract Staking is ReentrancyGuard, Ownable {
     bool public isPaused = false;
     uint256 public rewardsPerSecond = 4.1538 ether;
     uint256 public constant stakingAmountToStart = 21 * 10 ** 6 * 10 ** 18; // 21M tokens
+    uint256 public totalStaked = 0;
 
     uint64 public stakingStartTime = 0;
     uint64 public stakingEndTime = 0;
     uint64 public totalUsersWeight = 0;
-    uint256 public totalStaked = 0;
 
     mapping(address => Stake) public userStakes;
     mapping(address => uint64) public userWeight;
