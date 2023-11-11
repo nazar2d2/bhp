@@ -44,6 +44,39 @@ describe("TokenBHP", function () {
       expect(await tokenBHP.totalSupply()).to.eq(expectedAmountLP.add(unlockedForMarketing).add(unlockedForEcosystem));
     });
 
+    it("No fees in 3 month", async function () {
+      await time.increase(3600 * 24 * 30 * 3);
+
+      const amount = parseEther("100");
+      await expect(tokenBHP.transfer(acc1.address, amount)).to.changeTokenBalances(
+        tokenBHP,
+        [owner.address, acc1.address],
+        [amount.mul(-1), amount],
+      );
+    });
+
+    it("Fees 0.618 % from month #4", async function () {
+      await time.increase(3600 * 24 * 30 * 4);
+
+      const amount = parseEther("100");
+      await tokenBHP.transfer(acc1.address, amount);
+      const expects = amount.sub(amount.mul(618).div(100000));
+      const balance = await tokenBHP.balanceOf(acc1.address);
+
+      expect(balance).to.equal(expects);
+    });
+
+    it("No fees in 46 month", async function () {
+      await time.increase(3600 * 24 * 30 * 46);
+
+      const amount = parseEther("100");
+      await expect(tokenBHP.transfer(acc1.address, amount)).to.changeTokenBalances(
+        tokenBHP,
+        [owner.address, acc1.address],
+        [amount.mul(-1), amount],
+      );
+    });
+
     it("Exclude from fees", async function () {
       await time.increase(3600 * 24 * 31 * 10);
 

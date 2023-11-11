@@ -16,14 +16,16 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     uint256 private constant oneDistributionPart = MAX_SUPPLY / 5;
     uint256 private constant marketingEcosystemUnlocked = oneDistributionPart / 5;
 
-    uint256 public constant timeWithoutFee = 30 days * 6;
+    uint64 public constant timeFeeStart = 30 days * 4;
+    uint64 public constant timeFeeEnd = 30 days * 42;
     mapping(address => bool) public excludedFromFee;
 
     address private stakingContractAddress;
     address private governanceContractAddress;
     address private multiSignContractAddress;
     address private preSalePaymentToken;
-    uint256 private feeEnabledAfter;
+    uint64 private feeEnabledAfter;
+    uint64 private feeDisabledAfter;
 
     // Ecosystem rewards & Marketing vesting
     uint64 public vestingStart;
@@ -43,7 +45,8 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     ERC20(_name, _symbol)
     Ownable(_initialOwner)
     {
-        feeEnabledAfter = block.timestamp + timeWithoutFee;
+        feeEnabledAfter = uint64(block.timestamp) + timeFeeStart;
+        feeDisabledAfter = feeEnabledAfter + timeFeeEnd;
         multiSignContractAddress = _multiSignAddress;
         preSalePaymentToken = _preSaleAddress;
 
@@ -77,7 +80,7 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
             }
         }
 
-        if (excludedFromFee[_from] || excludedFromFee[_to] || block.timestamp < feeEnabledAfter) {
+        if (excludedFromFee[_from] || excludedFromFee[_to] || block.timestamp < feeEnabledAfter || block.timestamp > feeDisabledAfter) {
             super._update(_from, _to, _value);
             return;
         }
@@ -170,7 +173,8 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
         }
 
         uint256 _totalPrice = getPreSalePrice(_amount);
-        IERC20(preSalePaymentToken).safeTransferFrom(msg.sender, multiSignContractAddress, _totalPrice);
+        IERC20 _token = IERC20(preSalePaymentToken);
+        SafeERC20.safeTransferFrom(_token, msg.sender, multiSignContractAddress, _totalPrice);
 
         presaleMinted += _amountWei;
         _mint(msg.sender, _amountWei);
@@ -233,14 +237,6 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
         uint256 _totalPriceUSD = getPreSalePrice(_amount);
         return (_totalPriceUSD * 10 ** 12) / 2000;
     }
-
-//    receive()
-//    external payable
-//    {}
-//
-//    fallback()
-//    external payable
-//    {}
 
     // ------------------ Only Owner ------------------
 

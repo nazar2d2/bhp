@@ -3,8 +3,10 @@ pragma solidity 0.8.21;
 
 import "./helpers/errors.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract Locker {
+    using SafeERC20 for IERC20;
     mapping(address => mapping(address => Deposit)) public deposits;
 
     struct Deposit {
@@ -47,9 +49,7 @@ contract Locker {
         uint256 _lockEndTime = block.timestamp + _lockDuration;
 
         IERC20 _token = IERC20(_tokenAddress);
-        if (!_token.transferFrom(msg.sender, address(this), _amount)) {
-            revert Locker_TransferFailed(address(this), _amount);
-        }
+        SafeERC20.safeTransferFrom(_token, msg.sender, address(this), _amount);
 
         Deposit storage deposit = deposits[_tokenAddress][msg.sender];
         if (deposit.amount > 0) {
@@ -78,9 +78,7 @@ contract Locker {
         deposit.lockEndTime = 0;
 
         IERC20 _token = IERC20(_tokenAddress);
-        if (!_token.transfer(msg.sender, _amount)) {
-            revert Locker_TransferFailed(msg.sender, _amount);
-        }
+        SafeERC20.safeTransfer(_token, msg.sender, _amount);
 
         emit TokensWithdrawn(msg.sender, _amount, _tokenAddress);
     }
