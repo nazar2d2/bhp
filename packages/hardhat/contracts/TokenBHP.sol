@@ -16,16 +16,15 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     uint256 private constant oneDistributionPart = MAX_SUPPLY / 5;
     uint256 private constant marketingEcosystemUnlocked = oneDistributionPart / 5;
 
-    uint64 public constant timeFeeStart = 30 days * 4;
-    uint64 public constant timeFeeEnd = 30 days * 42;
-    mapping(address => bool) public excludedFromFee;
-
     address private stakingContractAddress;
     address private governanceContractAddress;
     address private multiSignContractAddress;
+    address private royaltyAddress;
     address private preSalePaymentToken;
     uint64 private feeEnabledAfter;
     uint64 private feeDisabledAfter;
+    uint64 public constant timeFeeStart = 30 days * 4;
+    uint64 public constant timeFeeEnd = 30 days * 42;
 
     // Ecosystem rewards & Marketing vesting
     uint64 public vestingStart;
@@ -36,11 +35,13 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     // PreSale
     uint256 public presaleMinted;
 
+    mapping(address => bool) public excludedFromFee;
+
     event PresaleMinted(address indexed user, uint256 amount);
 
     constructor(
         address _initialOwner, string memory _name, string memory _symbol,
-        address _multiSignAddress, address _preSaleAddress
+        address _multiSignAddress, address _preSaleAddress, address _royaltyAddress
     )
     ERC20(_name, _symbol)
     Ownable(_initialOwner)
@@ -49,6 +50,7 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
         feeDisabledAfter = feeEnabledAfter + timeFeeEnd;
         multiSignContractAddress = _multiSignAddress;
         preSalePaymentToken = _preSaleAddress;
+        royaltyAddress = _royaltyAddress;
 
         // Ecosystem & Marketing - 2 years vesting
         vestingStart = uint64(block.timestamp);
@@ -85,10 +87,10 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
             return;
         }
 
-        uint256 _taxBurn = _value * 309 / 100000; // 0.309 %
-        super._update(_from, stakingContractAddress, _taxBurn);
-        super._burn(_from, _taxBurn);
-        super._update(_from, _to, _value - _taxBurn * 2);
+        uint256 _taxPct = _value * 309 / 100000; // 0.309 %
+        super._update(_from, multiSignContractAddress, _taxPct);
+        super._update(_from, royaltyAddress, _taxPct);
+        super._update(_from, _to, _value - _taxPct * 2);
     }
 
     function ecosystemMint()

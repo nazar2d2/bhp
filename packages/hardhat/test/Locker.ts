@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 
 describe("TokenBHP", function () {
   async function deployFixture(): Promise<[TokenBHP, Locker]> {
-    const [owner, multiSignAddress] = await ethers.getSigners();
+    const [owner, multiSignAddress, royaltyAddress] = await ethers.getSigners();
 
     const TokenBHP = await ethers.getContractFactory("TokenBHP");
     const tokenBHP = (await TokenBHP.deploy(
@@ -15,6 +15,7 @@ describe("TokenBHP", function () {
       "SMB",
       multiSignAddress.address,
       multiSignAddress.address,
+      royaltyAddress.address,
     )) as TokenBHP;
     await tokenBHP.deployed();
 

@@ -10,7 +10,7 @@ export type ContractsListParams = {
 export const beforeCommon = async (): Promise<ContractsListParams> => {
   const name = "Token";
   const symbol = "TKN";
-  const [owner, acc1, multiSignAddress] = await ethers.getSigners();
+  const [owner, acc1, multiSignAddress, royaltyAddress] = await ethers.getSigners();
 
   // USDT Mock
   const TokenPresaleMock = await ethers.getContractFactory("TokenPresaleMock");
@@ -25,6 +25,7 @@ export const beforeCommon = async (): Promise<ContractsListParams> => {
     symbol,
     multiSignAddress.address,
     tokenPresaleMock.address,
+    royaltyAddress.address,
   )) as TokenBHP;
   await tokenBHP.deployed();
 

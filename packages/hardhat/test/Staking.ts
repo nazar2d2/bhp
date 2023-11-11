@@ -15,7 +15,14 @@ describe("Staking", function () {
     const [owner] = await ethers.getSigners();
 
     const TokenBHP = await ethers.getContractFactory("TokenBHP");
-    const tokenBHP = (await TokenBHP.deploy(owner.address, "Token", "TKN", TEST_ADDRESS, TEST_ADDRESS)) as TokenBHP;
+    const tokenBHP = (await TokenBHP.deploy(
+      owner.address,
+      "Token",
+      "TKN",
+      TEST_ADDRESS,
+      TEST_ADDRESS,
+      TEST_ADDRESS,
+    )) as TokenBHP;
     await tokenBHP.deployed();
 
     const Staking = await ethers.getContractFactory("Staking");
