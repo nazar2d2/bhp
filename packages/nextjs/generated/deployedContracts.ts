@@ -5,7 +5,7 @@ const contracts = {
       name: "sepolia",
       contracts: {
         Locker: {
-          address: "0xB71113fED091cA80b00A191561b261D86F2C1F38",
+          address: "0x796CEB185fF780674f64748dAfEA73399030dFfd",
           abi: [
             {
               inputs: [],
@@ -138,9 +138,9 @@ const contracts = {
                   type: "uint256",
                 },
                 {
-                  internalType: "uint256",
+                  internalType: "uint8",
                   name: "_lockDurationInYears",
-                  type: "uint256",
+                  type: "uint8",
                 },
               ],
               name: "depositTokens",
@@ -174,9 +174,9 @@ const contracts = {
                   type: "uint256",
                 },
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "lockEndTime",
-                  type: "uint256",
+                  type: "uint64",
                 },
               ],
               stateMutability: "view",
@@ -217,9 +217,9 @@ const contracts = {
               name: "getUnlockTime",
               outputs: [
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "",
-                  type: "uint256",
+                  type: "uint64",
                 },
               ],
               stateMutability: "view",
@@ -241,7 +241,7 @@ const contracts = {
           ],
         },
         Staking: {
-          address: "0x2E7ECd514cfC018E9597cD0Fd7Cdd16554F4e2Ff",
+          address: "0xC0FAd1C6B5021e1e19650AcE5cb7904772990a53",
           abi: [
             {
               inputs: [
@@ -547,9 +547,9 @@ const contracts = {
               name: "stakingEndTime",
               outputs: [
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "",
-                  type: "uint256",
+                  type: "uint64",
                 },
               ],
               stateMutability: "view",
@@ -560,9 +560,9 @@ const contracts = {
               name: "stakingStartTime",
               outputs: [
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "",
-                  type: "uint256",
+                  type: "uint64",
                 },
               ],
               stateMutability: "view",
@@ -599,9 +599,9 @@ const contracts = {
               name: "totalUsersWeight",
               outputs: [
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "",
-                  type: "uint256",
+                  type: "uint64",
                 },
               ],
               stateMutability: "view",
@@ -643,14 +643,14 @@ const contracts = {
                   type: "uint256",
                 },
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "startStaking",
-                  type: "uint256",
+                  type: "uint64",
                 },
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "timeOfLastUpdate",
-                  type: "uint256",
+                  type: "uint64",
                 },
                 {
                   internalType: "uint256",
@@ -672,9 +672,9 @@ const contracts = {
               name: "userWeight",
               outputs: [
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "",
-                  type: "uint256",
+                  type: "uint64",
                 },
               ],
               stateMutability: "view",
@@ -703,7 +703,7 @@ const contracts = {
           ],
         },
         TokenBHP: {
-          address: "0xDD2a47551aea623FD29fcFdBfCd79339d6a81f3E",
+          address: "0x6DaE8D29c496c88fAb05D5f71272ca563936E572",
           abi: [
             {
               inputs: [
@@ -730,6 +730,11 @@ const contracts = {
                 {
                   internalType: "address",
                   name: "_preSaleAddress",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "_royaltyAddress",
                   type: "address",
                 },
               ],
@@ -1396,12 +1401,25 @@ const contracts = {
             },
             {
               inputs: [],
-              name: "timeWithoutFee",
+              name: "timeFeeEnd",
               outputs: [
                 {
-                  internalType: "uint256",
+                  internalType: "uint64",
                   name: "",
-                  type: "uint256",
+                  type: "uint64",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "timeFeeStart",
+              outputs: [
+                {
+                  internalType: "uint64",
+                  name: "",
+                  type: "uint64",
                 },
               ],
               stateMutability: "view",
@@ -1515,7 +1533,7 @@ const contracts = {
           ],
         },
         TokenJOMO: {
-          address: "0xe951eD77fEd09dfd69787e8c0Aa17BF749747698",
+          address: "0x60906A5c479ce6951388a0749a061a179673C908",
           abi: [
             {
               inputs: [

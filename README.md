@@ -55,6 +55,13 @@ yarn deploy --network sepolia --reset
 yarn verify --network sepolia
 ```
 
+### Deploy to Mainnet:
+
+``` 
+yarn deploy --network mainnet
+yarn verify --network mainnet
+```
+
 ### Mythril Analize:
 
 ``` 
