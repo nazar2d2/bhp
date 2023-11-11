@@ -90,6 +90,17 @@ describe("TokenJOMO", function () {
       expect(govBalanceUser2).to.eq(blockReward.mul(10).mul(1));
     });
 
+    it("Check big numbers", async function () {
+      const blocksAmount = 5000000000;
+      await mine(blocksAmount - 1);
+
+      await tokenBHP.connect(acc1).transfer(owner.address, parseEther("1"));
+      const govBalance = await tokenJOMO.connect(acc1).balanceOf(acc1.address);
+
+      const blockReward = await tokenJOMO.BLOCK_REWARD();
+      expect(govBalance).to.eq(blockReward.mul(amountBHP).mul(blocksAmount));
+    });
+
     it("Error on transfer", async function () {
       expect(tokenJOMO.transfer(acc3.address, 1)).to.be.revertedWith("JOMO: Token is not transferable");
     });

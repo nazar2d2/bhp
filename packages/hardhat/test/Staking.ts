@@ -353,6 +353,23 @@ describe("Staking", function () {
 
       expect(rewards).lte(totalStakingSupply);
     });
+
+    it("Check big numbers", async function () {
+      const [owner] = await ethers.getSigners();
+      const amount = await tokenBHP.balanceOf(owner.address);
+      const acc1InitBalance = await tokenBHP.balanceOf(acc1.address);
+
+      await tokenBHP.transfer(acc1.address, amount);
+      await tokenBHP.connect(acc1).approve(staking.address, amount);
+
+      await staking.connect(acc1).deposit(amount);
+      await time.increase(3600 * 24 * 10000);
+
+      const [, rewards] = await staking.connect(acc1).getDepositInfo(acc1.address);
+      await staking.connect(acc1).claimRewards();
+      const acc1Balance = await tokenBHP.balanceOf(acc1.address);
+      expect(acc1Balance).to.equal(acc1InitBalance.add(rewards));
+    });
   });
 
   describe("Claim", function () {

@@ -31,8 +31,6 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     uint64 public vestingEnd;
     uint256 public ecosystemVestingMinted;
     uint256 public marketingVestingMinted;
-
-    // PreSale
     uint256 public presaleMinted;
 
     mapping(address => bool) public excludedFromFee;
@@ -236,8 +234,7 @@ contract TokenBHP is ERC20, ERC20Burnable, Ownable {
     public view
     returns (uint256)
     {
-        uint256 _totalPriceUSD = getPreSalePrice(_amount);
-        return (_totalPriceUSD * 10 ** 12) / 2000;
+        return (getPreSalePrice(_amount) * 10 ** 12) / 2000;
     }
 
     // ------------------ Only Owner ------------------

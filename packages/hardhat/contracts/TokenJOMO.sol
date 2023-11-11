@@ -9,7 +9,7 @@ import "./TokenBHP.sol";
 contract TokenJOMO is ERC20 {
     uint64 public constant BLOCK_REWARD = 1000000000000;
     address private immutable tokenBHPAddress;
-    mapping(address => uint32) private lastBlockUpdate;
+    mapping(address => uint64) private lastBlockUpdate;
 
     constructor(string memory _name, string memory _symbol, address _tokenBHPAddress)
     ERC20(_name, _symbol)
@@ -24,14 +24,14 @@ contract TokenJOMO is ERC20 {
 
         if (lastBlockUpdate[_userAddress] > 0) {
             TokenBHP _tokenBHP = TokenBHP(tokenBHPAddress);
-            uint32 _blocksDiff = uint32(block.number) - lastBlockUpdate[_userAddress];
+            uint64 _blocksDiff = uint64(block.number) - lastBlockUpdate[_userAddress];
             uint256 _userBalance = _tokenBHP.balanceOf(_userAddress);
-            uint256 _govAmount = (_blocksDiff * BLOCK_REWARD * _userBalance) / 10 ** 18;
+            uint256 _govAmount = (uint256(_blocksDiff) * uint256(BLOCK_REWARD) * _userBalance) / 10 ** 18;
 
             _mint(_userAddress, _govAmount);
         }
 
-        lastBlockUpdate[_userAddress] = uint32(block.number);
+        lastBlockUpdate[_userAddress] = uint64(block.number);
     }
 
     function _update(address _from, address _to, uint256 _value)
