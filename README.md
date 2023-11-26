@@ -1,4 +1,9 @@
-# Be Happy Protocol
+# BeHappyProtocol
+
+Whitepaper & Docs:
+
+- https://tooktook.notion.site/BeHappyProtocol-Whitepaper-ed74a9d4c206425e9e8b04ce86febef0?pvs=4
+- https://tooktook.notion.site/BHP-home-2556f60754bc4e0089009d4f6f43909a?pvs=4
 
 ## Requirements
 
